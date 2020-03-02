@@ -5,7 +5,7 @@
 
 	<groupId>com.meritoki.module.library</groupId>
 	<artifactId>module-library</artifactId>
-	<version>0.2.202001</version>
+	<version>0.3.202003</version>
 	<packaging>jar</packaging>
 
 	<name>module</name>

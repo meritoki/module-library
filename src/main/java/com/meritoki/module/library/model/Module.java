@@ -26,7 +26,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new ConcurrentHashMap<>());
 	protected int moduleMapSize = 0;
 	public Thread thread = null;
-	protected Module root = null;
+	public Module root = null;
 	protected Integer id = Integer.valueOf(0);
 	protected volatile boolean start = true;
 	protected volatile boolean run = true;
@@ -190,6 +190,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
+		System.out.println(object);
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
@@ -226,7 +227,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void rootAdd(Object object) {
 		if (this.root != null) {
-//			logger.info("A rootAdd(" + object + ")");
+//			logger.info("rootAdd(" + object + ")");
 			this.root.add(object);
 		}
 	}
@@ -297,6 +298,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		String stringPackage = getClass().getPackage().getName();
 		if (stringPackage != null) {
 			string = string.replaceFirst("^" + stringPackage + ".", "");
+			string = string.substring(0,string.indexOf('@'));
 		}
 		return string;
 	}

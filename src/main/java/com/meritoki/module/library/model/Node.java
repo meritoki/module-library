@@ -127,47 +127,12 @@ public class Node extends StateMachine implements NodeMBean {
 		super.initialize();
 		this.idProperties = idPropertiesLoadFromXML(this.id.intValue());
 		this.configurationProperties = configurationPropertiesLoadFromXML(this.idProperties);
-//		this.log4JPath = getProperty("@log4JPath");
-//		logger.info(this.log4JPath);
-//		if (StringUtils.isNotBlank(this.log4JPath)) {
-//			System.out.println("log4j not null");
-//			File log4JFile = new File(FilenameUtils.normalize(this.log4JPath));
-//			if (log4JFile.exists()) {
-//				System.out.println("log4j exists");
-////			    System.setProperty("log4j2.configurationFile", log4JFile.toURI().toString());
-////				ConfigurationSource source;
-////				try {
-////					source = new ConfigurationSource(new FileInputStream(log4JFile));
-////					Configurator.initialize(null, source);
-////					logger = LogManager.getLogger(getClass());
-////				} catch (FileNotFoundException e) {
-////					// TODO Auto-generated catch block
-////					e.printStackTrace();
-////				} catch (IOException e) {
-////					// TODO Auto-generated catch block
-////					e.printStackTrace();
-////				}
-//		
-//			} else {
-//				byte[] log4JByteArray = readFile(getClass().getResourceAsStream(log4JFile.getName()));
-//				if (log4JByteArray.length > 0) {
-//					if (!writeFile(log4JFile, log4JByteArray)) {
-//						log4JFile.delete();
-//					}
-//				} else {
-//					logger.warn("initialize() (log4JByteArray.length = 0)");
-//				}
-//			}
-//		} else {
-//			logger = LogManager.getLogger(getClass());
-//		}
 		this.idSet.addAll(Utility.stringToIntegerSet(getProperty("idSet"), ",", "-"));
 		this.stateMap.put(INPUT, "INPUT");
 		this.inputDelay = Utility.stringToDouble(getProperty("@inputDelay"));
 		this.runtime = Runtime.getRuntime();
 		this.tryMax = Utility.stringToInteger(getProperty("@tryMax"));
 		this.operatingSystem = newOperatingSystem();
-
 	}
 
 	public void destroy() {
