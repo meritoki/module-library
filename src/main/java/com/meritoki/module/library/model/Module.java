@@ -14,18 +14,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 public class Module extends URLClassLoader implements ModuleInterface {
-	public static Logger logger;
+	public static Logger logger = LogManager.getLogger(Module.class);
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new ConcurrentHashMap<>());
 	protected int moduleMapSize = 0;
 	public Thread thread = null;
-	protected Module root = null;
+	public Module root = null;
 	protected Integer id = Integer.valueOf(0);
 	protected volatile boolean start = true;
 	protected volatile boolean run = true;
@@ -46,51 +47,48 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public Module() {
 		super(new URL[0], Module.class.getClassLoader());
 		setID(0);
-		if (logger == null) {
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(Module.class);
-			logger.setLevel(Level.INFO);
-		}
+//		if (logger == null) {
+//			logger = LogManager.getLogger(Module.class);
+//			Configurator.setRootLevel(Level.INFO);
+//		}
 	}
 
 	public Module(int id) {
 		super(new URL[0], Module.class.getClassLoader());
 		setID(id);
-		if (logger == null) {
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(Module.class);
-			logger.setLevel(Level.DEBUG);
-		}
+//		if (logger == null) {
+//			logger = LogManager.getLogger(Module.class);
+//			Configurator.setRootLevel(Level.INFO);
+//		}
 	}
 
 	public Module(URL[] urlArray) {
 		super(urlArray, Module.class.getClassLoader());
 		setID(0);
-		if (logger == null) {
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(Module.class);
-			logger.setLevel(Level.INFO);
-		}
+//		if (logger == null) {
+//			logger = LogManager.getLogger(Module.class);
+//			Configurator.setRootLevel(Level.INFO);
+//		}
 	}
 
 	public Module(int id, Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(id);
 		setRoot(module);
-		if (logger == null) {
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(Module.class);
-		}
+//		if (logger == null) {
+//			logger = LogManager.getLogger(Module.class);
+//			Configurator.setRootLevel(Level.INFO);
+//		}
 	}
 
 	public Module(Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(0);
 		setRoot(module);
-		if (logger == null) {
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(Module.class);
-		}
+//		if (logger == null) {
+//			logger = LogManager.getLogger(Module.class);
+//			Configurator.setRootLevel(Level.INFO);
+//		}
 	}
 
 	private void setID(int id) {
@@ -101,9 +99,9 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public void start() {
 		if (this.start) {
 			this.start = false;
-			if (logger.isDebugEnabled()) {
-				logger.trace(this + ".start()");
-			}
+//			if (logger.isDebugEnabled()) {
+//				logger.trace(this + ".start()");
+//			}
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
@@ -111,17 +109,17 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void initialize() {
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".initialize()");
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.trace(this + ".initialize()");
+//		}
 	}
 
 	public void run() {
-		initialize();
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".run()");
-		}
-		countDownLatchCountDown();
+		this.initialize();
+//		if (logger.isDebugEnabled()) {
+//			logger.trace(this + ".run()");
+//		}
+		this.countDownLatchCountDown();
 	}
 
 	public void stop() {
@@ -192,13 +190,10 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
+		logger.debug("add("+object+")");
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
-				if (logger.isDebugEnabled()) {
-					logger.trace("inputObjectListAdd(" + object + ") (this.inputObjectList.size()="
-							+ this.objectList.size() + ")");
-				}
 			} else {
 				this.objectList.add(object);
 			}
@@ -232,9 +227,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void rootAdd(Object object) {
 		if (this.root != null) {
-			if (logger.isDebugEnabled()) {
-				logger.trace("rootAdd(" + object + ")");
-			}
 			this.root.add(object);
 		}
 	}
@@ -305,6 +297,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		String stringPackage = getClass().getPackage().getName();
 		if (stringPackage != null) {
 			string = string.replaceFirst("^" + stringPackage + ".", "");
+			string = string.substring(0,string.indexOf('@'));
 		}
 		return string;
 	}
