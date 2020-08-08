@@ -96,7 +96,7 @@ public class Node extends StateMachine implements NodeMBean {
 	protected int timeout = -1;
 	private boolean data = true;
 	protected boolean poll = false;
-	protected boolean add = true;
+	protected boolean filter = true;
 	protected double acknowledgeDelay = 0.0D;
 
 	public static void main(String[] args) {
@@ -148,56 +148,29 @@ public class Node extends StateMachine implements NodeMBean {
 		}
 	}
 
-	
 	@Override
 	public void add(Object object) {
-//		logger.info("C add("+object+")");
-//		if (this.add) {
-//			if (this.data) {
-				if ((object instanceof Data)) {
-//					logger.info("D add("+object+")");
-					Data data = (Data) object;
-//					logger.info("D add("+object+") data.getDestinationID()="+data.getDestinationID());
-//					logger.info("D add("+object+") this.id="+this.id);
-					if (data.getDestinationID() == this.id.intValue()) {
-//						if (logger.isDebugEnabled()) {
-//							logger.info("add(" + object + ") ((data.getDestinationID()==this.id)");
-//						}
-						if (this.idSet.contains(Integer.valueOf(data.getSourceID()))) {
-//							if (logger.isDebugEnabled()) {
-//								logger.info("add(" + object
-//										+ ") (this.idSet.contains(data.getSourceID()))");
-//							}
-							super.add(data);
-						}
+		if (this.filter) {
+			if ((object instanceof Data)) {
+				Data data = (Data) object;
+				logger.debug("add(" + object + ") data.getDestinationID()=" + data.getDestinationID());
+				logger.debug("add(" + object + ") this.id=" + this.id);
+				if (data.getDestinationID() == this.id.intValue()) {
+					logger.debug("add(" + object + ") data.sourceID=" + data.sourceId);
+					logger.debug("add(" + object + ") this.idSet="+this.idSet);
+					if (this.idSet.contains(Integer.valueOf(data.getSourceID()))) {
+						logger.debug("add("+object+") success");
+						super.add(data);
+					} else {
+						logger.error("add("+object+") idSet does not contain sourceID");
 					}
 				}
+			}
+		} else {
+			super.add(object);
+		}
 	}
-//	@Override
-//	public void add(Object object) {
-////		if (this.add) {
-////			if (this.data) {
-//				if ((object instanceof Data)) {
-//					logger.info("add("+object+")");
-//					Data data = (Data) object;
-//					if (data.getDestinationID() == this.id.intValue()) {
-////						if (logger.isDebugEnabled()) {
-//							logger.info("add(" + object + ") ((data.getDestinationID()==this.id)");
-////						}
-//						if (this.idSet.contains(Integer.valueOf(data.getSourceID()))) {
-////							if (logger.isDebugEnabled()) {
-//								logger.info("add(" + object
-//										+ ") (this.idSet.contains(data.getSourceID()))");
-////							}
-//							super.add(data);
-//						}
-//					}
-//				}
-////			} else {
-////				super.add(object);
-////			}
-////		}
-//	}
+
 
 	public String getConfigurationPropertiesPath() {
 		if (logger.isDebugEnabled()) {
@@ -658,6 +631,7 @@ public class Node extends StateMachine implements NodeMBean {
 				properties = new Properties();
 				properties.loadFromXML(inputStream);
 			} catch (InvalidPropertiesFormatException e) {
+				e.printStackTrace();
 				logger.error("propertiesLoadFromXML(" + inputStream + ") InvalidPropertiesFormatException");
 				properties = null;
 			} catch (IOException e) {
@@ -740,16 +714,16 @@ public class Node extends StateMachine implements NodeMBean {
 				if (keyDelta != null) {
 					if ((this.configurationPropertiesKeySet != null)
 							&& (this.configurationPropertiesKeySet.contains(keyDelta))) {
-						
-							logger.debug("getProperty(" + key + ", " + defaultValue
-									+ ") (this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
-						
+
+						logger.debug("getProperty(" + key + ", " + defaultValue
+								+ ") (this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
+
 						property = getConfigurationProperty(keyDelta);
 					} else {
-					
-							logger.debug("getProperty(" + key + ", " + defaultValue
-									+ ") (!this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
-						
+
+						logger.debug("getProperty(" + key + ", " + defaultValue
+								+ ") (!this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
+
 						String value = getIDProperty(key);
 						setConfigurationProperty(keyDelta, value);
 						property = value;
@@ -761,11 +735,11 @@ public class Node extends StateMachine implements NodeMBean {
 			property = defaultValue;
 		}
 //		if (logger.isDebugEnabled()) {
-			if (property != null) {
-				logger.debug("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
-			} else {
-				logger.trace("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
-			}
+		if (property != null) {
+			logger.debug("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
+		} else {
+			logger.trace("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
+		}
 //		}
 		return property;
 	}
@@ -895,9 +869,9 @@ public class Node extends StateMachine implements NodeMBean {
 	}
 
 	protected int execute(String command) {
-	
-			logger.info("execute(" + command + ")");
-		
+
+		logger.info("execute(" + command + ")");
+
 		int processWaitFor = -1;
 		this.process = getProcess(command);
 		if (this.process != null) {
@@ -955,3 +929,29 @@ public class Node extends StateMachine implements NodeMBean {
 		return combined;
 	}
 }
+
+//@Override
+//public void add(Object object) {
+////	if (this.add) {
+////		if (this.data) {
+//			if ((object instanceof Data)) {
+//				logger.info("add("+object+")");
+//				Data data = (Data) object;
+//				if (data.getDestinationID() == this.id.intValue()) {
+////					if (logger.isDebugEnabled()) {
+//						logger.info("add(" + object + ") ((data.getDestinationID()==this.id)");
+////					}
+//					if (this.idSet.contains(Integer.valueOf(data.getSourceID()))) {
+////						if (logger.isDebugEnabled()) {
+//							logger.info("add(" + object
+//									+ ") (this.idSet.contains(data.getSourceID()))");
+////						}
+//						super.add(data);
+//					}
+//				}
+//			}
+////		} else {
+////			super.add(object);
+////		}
+////	}
+//}

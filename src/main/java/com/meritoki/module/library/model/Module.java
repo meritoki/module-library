@@ -190,7 +190,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
-		System.out.println(object);
+		logger.debug("add("+object+")");
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
@@ -227,7 +227,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void rootAdd(Object object) {
 		if (this.root != null) {
-//			logger.info("rootAdd(" + object + ")");
 			this.root.add(object);
 		}
 	}

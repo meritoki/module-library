@@ -1,5 +1,7 @@
 package com.meritoki.module.library.model;
 
+import java.io.IOException;
+
 /*
 Copyright 2018 Josvaldor
 
@@ -21,6 +23,9 @@ import java.util.Date;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class Data
 {
@@ -102,18 +107,30 @@ public class Data
     return flag;
   }
   
-  public String toString()
-  {
-    String string = super.toString();
-    String stringPackage = getClass().getPackage().getName();
-    if (stringPackage != null) {
-      string = string.replaceFirst("^" + stringPackage + ".", "");
-    }
-    return string;
-  }
+//  public String toString()
+//  {
+//    String string = super.toString();
+//    String stringPackage = getClass().getPackage().getName();
+//    if (stringPackage != null) {
+//      string = string.replaceFirst("^" + stringPackage + ".", "");
+//    }
+//    return string;
+//  }
   
   public List<Object> getOutputObjectList()
   {
     return this.outputObjectList;
   }
+  
+	@Override
+	public String toString() {
+		String string = "";
+		ObjectWriter ow = new ObjectMapper().writer();//.withDefaultPrettyPrinter();
+		try {
+			string = ow.writeValueAsString(this);
+		} catch (IOException ex) {
+			logger.error("IOException " + ex.getMessage());
+		}
+		return string;
+	}
 }
