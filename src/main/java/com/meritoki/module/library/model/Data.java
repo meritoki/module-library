@@ -93,7 +93,7 @@ public class Data
     return this.object;
   }
   
-  public boolean outputObjectListAdd(Data container)
+  public boolean objectListAdd(Data container)
   {
     boolean flag = false;
     if (this.outputObjectList != null) {

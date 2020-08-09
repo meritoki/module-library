@@ -24,13 +24,16 @@ public class Output extends Node {
 
 	public Output(int id, Module module, OutputStream outputStream) {
 		super(Integer.valueOf(id), module);
+		logger.debug("Output("+id+", "+module+", "+outputStream+")");
 		this.outputStream = outputStream;
 	}
 
+	@Override
 	public void initialize() {
 		super.initialize();
 	}
 
+	@Override
 	public void destroy() {
 		if (!this.destroy) {
 			super.destroy();
@@ -39,12 +42,14 @@ public class Output extends Node {
 	}
 
 	public void output(Object object) {
+		logger.info("output("+object+")");
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
 			byte[] byteArray = protocol.getByteArray();
 			try {
 				this.outputStream.write(byteArray);
 				this.outputStream.flush();
+				logger.info("output("+object+") written");
 			} catch (IOException e) {
 				logger.error("output(" + object + ") IOException");
 				setState(0);
@@ -52,6 +57,7 @@ public class Output extends Node {
 		}
 	}
 
+	@Override
 	protected void inputState(Object object) {
 		if ((object instanceof Data)) {
 			Data container = (Data) object;
@@ -60,6 +66,21 @@ public class Output extends Node {
 			case 1:
 				output(object);
 			}
+		}
+	}
+	
+	protected void outputStreamClose(OutputStream outputStream) {
+		if (logger.isDebugEnabled()) {
+			logger.trace(this + ".outputStreamClose(" + outputStream + ")");
+		}
+		if (outputStream != null) {
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+				logger.warn(this + ".outputStreamClose(" + outputStream + ") IOException");
+			}
+		} else {
+			logger.warn(this + ".outputStreamClose(" + outputStream + ") (outputStream = null)");
 		}
 	}
 }

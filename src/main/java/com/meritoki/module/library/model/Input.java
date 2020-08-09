@@ -18,74 +18,81 @@ package com.meritoki.module.library.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class Input extends Node {
 	protected InputStream inputStream = null;
 	protected int byteArrayLength = 0;
 	protected byte[] byteArray = new byte[0];
-	protected double waitForInputMinDelay = 2.0D;
-	protected double waitForInputMaxDelay = 10.0D;
+	protected double minInputDelay = 2.0D;
+	protected double maxInputDelay = 10.0D;
 
 	public Input(int id, Module module, InputStream inputStream) {
 		super(Integer.valueOf(id), module);
+		logger.debug("Input("+id+", "+module+", "+inputStream+")");
 		this.inputStream = inputStream;
 	}
 
+	@Override
 	public void initialize() {
 		super.initialize();
-		this.waitForInputMinDelay = Utility.stringToDouble(getProperty("@waitForInputMinDelay"));
-		this.waitForInputMaxDelay = Utility.stringToDouble(getProperty("@waitForInputMaxDelay"));
+		this.minInputDelay = Utility.stringToDouble(getProperty("@minInputDelay"));
+		this.maxInputDelay = Utility.stringToDouble(getProperty("@maxInputDelay"));
 		this.byteArrayLength = Utility.stringToInteger(getProperty("@byteArrayLength"));
+		logger.info("initialize() this.minInputDelay="+this.minInputDelay);
+		logger.info("initialize() this.maxInputDelay="+this.maxInputDelay);
+		logger.info("initialize() this.byteArrayLength="+this.byteArrayLength);
 	}
 
+	@Override
+	protected void inputState(Object object) {
+		input(object);
+	}
+
+	@Override
 	public void destroy() {
 		if (!this.destroy) {
 			super.destroy();
 			inputStreamClose(this.inputStream);
 		}
 	}
-
+	
 	public void input(Object object) {
 		try {
 			if (this.inputStream.read(this.byteArray = new byte[this.byteArrayLength]) != -1) {
-				setDelay(newDelay(this.waitForInputMinDelay));
-				object = this.protocol.deserialize(this.byteArray);
-				if ((object instanceof Protocol)) {
-					this.protocol = ((Protocol) object);
-					switch (this.protocol.getState()) {
-					case 8:
-						this.poll = true;
-						inputData(this.protocol);
-						break;
-					case 9:
-						this.protocol = new Protocol();
-					}
+				setDelay(newDelay(this.minInputDelay));
+				Protocol protocol = new Protocol();
+				protocol.deserialize(this.byteArray);
+				switch (protocol.getState()) {
+				case Protocol.GOOD:
+					logger.info("input(...) Protocol.GOOD protocol.data="+protocol.data);
+					this.poll = true;
+					inputData(protocol);
+					break;
+				case Protocol.BAD:
+					protocol = new Protocol();
 				}
 			}
 		} catch (IOException e) {
 			logger.fatal("input(object) IOException");
 			setState(0);
 		}
-		if (delayExpired()) {
-			switch (this.state) {
-			case 2:
-				if (this.poll) {
-					this.poll = false;
-					inputData(Boolean.valueOf(this.poll));
-					setDelay(newDelay(this.waitForInputMaxDelay));
-					logger.warn("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
-							+ ")))");
-				} else {
-					logger.warn("input() this.delayExpired()");
-					setState(0);
-				}
-				break;
-			}
-		}
-	}
-
-	protected void inputState(Object object) {
-		input(object);
+//		if (delayExpired()) {
+//			switch (this.state) {
+//			case INPUT:
+//				if (this.poll) {
+//					this.poll = false;
+//					inputData(Boolean.valueOf(this.poll));
+//					setDelay(newDelay(this.waitForInputMaxDelay));
+//					logger.warn("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
+//							+ ")))");
+//				} else {
+//					logger.warn("input() this.delayExpired()");
+//					setState(0);
+//				}
+//				break;
+//			}
+//		}
 	}
 
 	protected void inputData(Object object) {
@@ -93,7 +100,22 @@ public class Input extends Node {
 			if (logger.isDebugEnabled()) {
 				logger.trace("inputContainer(" + object + ")");
 			}
-			add(new Data(this.id.intValue(), this.id.intValue(), 2, 0.0D, object, null));
+			this.rootAdd(new Data(this.id.intValue(), this.id.intValue(), 2, 0.0D, object, null));
+		}
+	}
+	
+	protected void inputStreamClose(InputStream inputStream) {
+		if (logger.isDebugEnabled()) {
+			logger.trace(this + ".inputStreamClose(" + inputStream + ")");
+		}
+		if (inputStream != null) {
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				logger.warn(this + ".inputStreamClose(" + inputStream + ") IOException");
+			}
+		} else {
+			logger.warn(this + ".inputStreamClose(" + inputStream + ") (inputStream = " + inputStream + ")");
 		}
 	}
 }

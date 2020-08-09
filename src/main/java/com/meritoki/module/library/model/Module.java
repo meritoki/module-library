@@ -99,9 +99,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public void start() {
 		if (this.start) {
 			this.start = false;
-//			if (logger.isDebugEnabled()) {
-//				logger.trace(this + ".start()");
-//			}
+			logger.info("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
@@ -132,9 +130,9 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public void destroy() {
 		if (!this.destroy) {
 			stop();
-			if (logger.isDebugEnabled()) {
-				logger.trace(this + ".destroy()");
-			}
+			
+			logger.info("destroy()");
+			
 			this.destroy = true;
 			if ((this.thread != null) && (this.interrupt)) {
 				this.thread.interrupt();
@@ -453,4 +451,9 @@ public class Module extends URLClassLoader implements ModuleInterface {
 			}
 		}
 	}
+	
+	  public int getModuleMapSize()
+	  {
+	    return this.moduleMap.size();
+	  }
 }

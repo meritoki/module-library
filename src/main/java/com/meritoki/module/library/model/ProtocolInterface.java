@@ -20,6 +20,6 @@ public abstract interface ProtocolInterface {
 
     public Object serialize(Object object);
 
-    public Object deserialize(Object object);
+    public Object deserialize(byte[] byteArray);
 
 }

@@ -24,7 +24,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.management.MBeanServer;
 
-public class StateMachine extends MBean implements StateMachineMBean {
+public class State extends Module {
 	public static final int DEFAULT = 0;
 	protected Map<Integer, String> stateMap;
 	protected int state = 0;
@@ -32,39 +32,30 @@ public class StateMachine extends MBean implements StateMachineMBean {
 	protected double defaultDelay = 1.0;
 
 	public static void main(String[] args) {
-		StateMachine stateMachine = new StateMachine(0);
+		State stateMachine = new State(0);
 		CountDownLatch countDownLatch;
 	    stateMachine.setCountDownLatch(countDownLatch = new CountDownLatch(1));
 		stateMachine.start();
 	}
 
-	public StateMachine() {
+	public State() {
 	}
 
-	public StateMachine(int id) {
+	public State(int id) {
 		super(id);
 	}
 
-	public StateMachine(int id, Module module) {
+	public State(int id, Module module) {
 		super(Integer.valueOf(id), module);
-	}
-
-	public StateMachine(URL[] urlArray, MBeanServer mBeanServer) {
-		super(urlArray, mBeanServer);
-	}
-
-	public StateMachine(MBeanServer mBeanServer) {
-		super(new URL[0], mBeanServer);
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
 		this.stateMap = Collections.synchronizedMap(new ConcurrentHashMap());
+		logger.info("initialize() this.defaultDelay="+this.defaultDelay);
 		this.stateMap.put(Integer.valueOf(0), "DEFAULT");
 		this.setState(DEFAULT);
-		this.setDelay(this.newDelay(0));
-
 	}
 
 	public void run() {
