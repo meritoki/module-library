@@ -49,7 +49,7 @@ public class Delay extends Node {
 		do {
 			if (((object = objectListGet(index)) instanceof Data)) {
 				Data container = (Data) object;
-				if (0.0D >= container.getExpirationTime() - now) {
+				if (0.0D >= container.getStop() - now) {
 					objectListRemove(index);
 					container.objectListAdd(container);
 				}
@@ -69,8 +69,8 @@ public class Delay extends Node {
 		do {
 			if (((object = objectListGet(pendingObjectListIndex)) instanceof Data)) {
 				Data container = (Data) object;
-				if (container.getExpirationTime() - now < delayMin) {
-					delayMin = container.getExpirationTime() - now;
+				if (container.getStop() - now < delayMin) {
+					delayMin = container.getStop() - now;
 				}
 			}
 			pendingObjectListIndex++;

@@ -66,11 +66,11 @@ public class Input extends Node {
 				Protocol protocol = new Protocol();
 				protocol.deserialize(this.byteArray);
 				switch (protocol.getState()) {
-				case Protocol.GOOD:
+				case GOOD:
 					logger.info("input(...) Protocol.GOOD protocol.data="+protocol.data);
 					inputData(protocol);
 					break;
-				case Protocol.BAD:
+				case BAD:
 					protocol = new Protocol();
 				}
 			}

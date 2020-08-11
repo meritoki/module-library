@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
 import com.meritoki.module.library.model.protocol.Protocol;
+import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Network extends Node {
 
@@ -136,7 +137,7 @@ public class Network extends Node {
 					this.output.add(
 							new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT, 0.0D, protocol, null));
 					int protocolDataLength;
-					if ((protocolDataLength = protocol.getDataLength()) > 0) {
+					if ((protocolDataLength = protocol.getData().length()) > 0) {
 						this.protocol.setMessageOffset(this.protocol.getMessageOffset() + protocolDataLength);
 						protocol.setTryCount(protocol.getTryCount() + 1);
 						this.delay.add(new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT,
@@ -154,16 +155,16 @@ public class Network extends Node {
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
 			switch (protocol.getType()) {
-			case Protocol.ADVERTISEMENT:
+			case ADVERTISEMENT:
 				protocolSetMessageAcknowledged(object);
 				break;
-			case Protocol.MESSAGE:
+			case MESSAGE:
 				if (protocolSetMessageAcknowledged(object)) {
 					delayAcknowledge(object);
 				}
 				outputProtocolAdvertisement();
 				break;
-			case Protocol.DISCONNECT:
+			case DISCONNECT:
 				logger.info("input(" + object + ") Protocol.DISCONNECT");
 				setState(DEFAULT);
 			}
@@ -177,7 +178,7 @@ public class Network extends Node {
 	}
 
 	protected void protocol(Protocol protocol) {
-		inputData(protocol.getObject());
+		inputData(protocol.getData());
 	}
 
 	protected boolean shouldAcknowledge(int messageAcknowledged) {
@@ -191,10 +192,10 @@ public class Network extends Node {
 	protected void delayAcknowledge(Object object) {
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
-			if (protocol.getDataLength() > 0) {
+			if (protocol.getData().length() > 0) {
 				protocol(protocol);
 				this.delay.add(new Data(this.id.intValue(), this.id.intValue(), DataType.ACKNOWLEDGE,
-						this.acknowledgeDelay, Integer.valueOf(protocol.getMessageOffset() + protocol.getDataLength()),
+						this.acknowledgeDelay, Integer.valueOf(protocol.getMessageOffset() + protocol.getData().length()),
 						this.objectList));
 			}
 		}
@@ -208,7 +209,7 @@ public class Network extends Node {
 				this.protocol.setMessageOffset(protocol.getMessageAcknowledged());
 			}
 			if (protocol.getMessageOffset() == this.protocol.getMessageAcknowledged()) {
-				this.protocol.setMessageAcknowledged(this.protocol.getMessageAcknowledged() + protocol.getDataLength());
+				this.protocol.setMessageAcknowledged(this.protocol.getMessageAcknowledged() + protocol.getData().length());
 				flag = true;
 			}
 		}
@@ -217,14 +218,14 @@ public class Network extends Node {
 
 	public void outputProtocolDisconnect() {
 		Protocol protocol = new Protocol();
-		protocol.serialize(5, this.protocol.getMessageOffset(), this.protocol.getMessageAcknowledged(), "");
+		protocol.serialize(ProtocolType.DISCONNECT, this.protocol.getMessageOffset(), this.protocol.getMessageAcknowledged(), "");
 		Data data = new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT, 0.0D, protocol, null);
 		this.output.add(data);
 	}
 
 	protected void outputProtocolAdvertisement() {
 		Protocol protocol = new Protocol();
-		protocol.serialize(2, this.protocol.getMessageOffset(), this.protocol.getMessageAcknowledged(), "");
+		protocol.serialize(ProtocolType.ADVERTISEMENT, this.protocol.getMessageOffset(), this.protocol.getMessageAcknowledged(), "");
 		this.output.add(new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT, 0.0D, protocol, null));
 	}
 

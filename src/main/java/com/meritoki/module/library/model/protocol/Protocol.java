@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.meritoki.module.library.model.Module;
@@ -31,84 +33,58 @@ import com.meritoki.module.library.model.Utility;
 
 public class Protocol {
 	protected Logger logger = Logger.getLogger(Protocol.class.getName());
-	public static final int START = 0;
-	public static final int LENGTH = 1;
-	public static final int VERSION = 2;
-	public static final int TYPE = 3;
-	public static final int OFFSET = 4;
-	public static final int ACKNOWLEDGE = 5;
-	public static final int DATA = 6;
-	public static final int CRC = 7;
-	public static final int GOOD = 8;
-	public static final int BAD = 9;
-	//
-	public static final int UNUSED = 1;
-	public static final int ADVERTISEMENT = 2;
-	public static final int MESSAGE = 3;
-	public static final int CONNECT = 4;
-	public static final int DISCONNECT = 5;
-	public static final int RESEND_REQUEST = 6;
-	//
-	protected int[] intArray = new int[0];
-	protected final int startLength = 2;
-	protected final int lengthLength = 2;
-	protected final int versionLength = 3;
-	protected final int typeLength = 1;
-	protected final int offsetLength = 4;
-	protected final int acknowledgeLength = 4;
-	protected int dataLength = 0;
-	protected final int crcLength = 2;
-	protected int[] startIntArray = new int[2];
-	protected int[] lengthIntArray = new int[2];
-	protected int[] versionIntArray = new int[3];
-	protected int[] typeIntArray = new int[1];
-	protected int[] offsetIntArray = new int[4];
-	protected int[] acknowledgeIntArray = new int[4];
-	protected int[] dataIntArray = new int[this.dataLength];
-	protected int[] crcIntArray = new int[2];
-	protected int start = 18502;
-	protected int length;
-	protected int type;
-	protected int offset = 0;
-	protected int acknowledge = 0;
-	protected int version = 2;
-	protected int crc;
-	protected int tryCount = 0;
-	protected double timeout = 0.5D;
-	protected int index = 0;
-	protected Object object = null;
-	protected int byteCount;
-	protected int byteArrayLength;
+	@JsonProperty
+	protected ProtocolType type;
+	@JsonProperty
+	protected ProtocolState state = ProtocolState.START;
+	@JsonIgnore
 	protected byte[] byteArray = new byte[0];
-	protected byte[] dataByteArray = new byte[0];
-	protected int state;
-	protected byte address;
-	protected boolean checkSum = false;
-	protected List<String> dataStringList;
+	@JsonIgnore
+	protected int[] startIntArray = new int[2];
+	@JsonIgnore
+	protected int[] lengthIntArray = new int[2];
+	@JsonIgnore
+	protected int[] versionIntArray = new int[3];
+	@JsonIgnore
+	protected int[] typeIntArray = new int[1];
+	@JsonIgnore
+	protected int[] offsetIntArray = new int[4];
+	@JsonIgnore
+	protected int[] acknowledgeIntArray = new int[4];
+	@JsonIgnore
+	protected int[] dataIntArray = new int[0];
+	@JsonIgnore
+	protected int[] crcIntArray = new int[2];
+	@JsonIgnore
+	protected int start = 18502;
+	@JsonIgnore
+	protected int length;
+	@JsonProperty
+	protected int version = 2;
+	@JsonProperty
+	protected int offset = 0;
+	@JsonProperty
+	protected int acknowledge = 0;
+	@JsonProperty
 	public String data;
+	protected int crc;
+	@JsonProperty
+	protected int tryCount = 0;
+	@JsonProperty
+	protected double timeout = 0.5D;
+	@JsonIgnore
+	protected int index = 0;
 
-	public boolean getCheckSum() {
-		return this.checkSum;
-	}
-
-	public void setCheckSum(boolean checkSum) {
-		this.checkSum = checkSum;
-	}
-
-	public byte getAddress() {
-		return this.address;
-	}
-
-	public void setAddress(byte address) {
-		this.address = address;
-	}
-
-	public Object serialize(int type, int offset, int acknowledge, String data) {
-		this.intArray = new int[0];
+	@JsonIgnore
+	public Object serialize(ProtocolType type, int offset, int acknowledge, String data) {
+		int[] intArray = new int[0];
+		this.type = type;
+		this.offset = offset;
+		this.acknowledge = acknowledge;
 		this.byteArray = new byte[0];
-		if ((type == 3) && (data != null)) {
-			this.dataLength = data.length();
-			this.length += this.dataLength;
+		if ((type == ProtocolType.MESSAGE) && (data != null)) {
+			this.data = data;
+			this.length += this.data.length();
 			this.dataIntArray = Utility.byteArrayToIntArray(data.getBytes());
 		}
 		this.length += 2;
@@ -121,137 +97,121 @@ public class Protocol {
 		this.startIntArray = Utility.intForwardMaskShifter(this.start, 255, 8, 2);
 		this.lengthIntArray = Utility.intForwardMaskShifter(this.length, 255, 8, 2);
 		this.versionIntArray = Utility.intForwardMaskShifter(this.version, 255, 8, 3);
-		this.typeIntArray = Utility.intForwardMaskShifter(this.type = type, 255, 8, 1);
-		this.offsetIntArray = Utility.intForwardMaskShifter(this.offset = offset, 255, 8, 4);
-		this.acknowledgeIntArray = Utility.intForwardMaskShifter(this.acknowledge = acknowledge, 255, 8, 4);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.startIntArray);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.lengthIntArray);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.versionIntArray);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.typeIntArray);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.offsetIntArray);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.acknowledgeIntArray);
-		if (type == 3) {
-			this.intArray = Utility.appendIntArrays(this.intArray, this.dataIntArray);
+		this.typeIntArray = Utility.intForwardMaskShifter(this.getType(this.type), 255, 8, 1);
+		this.offsetIntArray = Utility.intForwardMaskShifter(this.offset, 255, 8, 4);
+		this.acknowledgeIntArray = Utility.intForwardMaskShifter(this.acknowledge, 255, 8, 4);
+		intArray = Utility.appendIntArrays(intArray, this.startIntArray);
+		intArray = Utility.appendIntArrays(intArray, this.lengthIntArray);
+		intArray = Utility.appendIntArrays(intArray, this.versionIntArray);
+		intArray = Utility.appendIntArrays(intArray, this.typeIntArray);
+		intArray = Utility.appendIntArrays(intArray, this.offsetIntArray);
+		intArray = Utility.appendIntArrays(intArray, this.acknowledgeIntArray);
+		if (type == ProtocolType.MESSAGE) {
+			intArray = Utility.appendIntArrays(intArray, this.dataIntArray);
 		}
-		this.crcIntArray = Utility.intForwardMaskShifter(computeCRC16One(this.intArray), 255, 8, 2);
-		this.intArray = Utility.appendIntArrays(this.intArray, this.crcIntArray);
-		this.byteArray = Utility.intArrayToByteArray(this.intArray);
+		this.crcIntArray = Utility.intForwardMaskShifter(computeCRC16One(intArray), 255, 8, 2);
+		intArray = Utility.appendIntArrays(intArray, this.crcIntArray);
+		this.byteArray = Utility.intArrayToByteArray(intArray);
 		return this.byteArray;
 	}
 
-	public Object serialize(Object object) {
-		if ((object instanceof byte[])) {
-			setByteArray((byte[]) object);
-		} else if ((object instanceof String)) {
-			setByteArray(((String) object).getBytes());
-		}
-		return object;
-	}
 
-//  public Object deserialize(Object object)
-//  {
-//    if ((object instanceof byte[]))
-//    {
-//      object = new String(this.byteArray);
-//      this.state = 8;
-//    }
-//    return object;
-//  }
-
+	@JsonIgnore
 	public byte[] deserialize(byte[] byteArray) {
-		this.intArray = new int[0];
+		int[] intArray = new int[0];
 		int byteArrayLength = byteArray.length;
+		int dataLength = 0;
 		int index = -1;
 		boolean flag = true;
 		while (index < byteArrayLength && flag) {
 			int integer, i;
 			switch (this.state) {
-			case 0:
+			case START:
 				this.startIntArray = Utility.intForwardMaskShifter(this.start, 255, 8, 2);
 				index++;
 				if (index + 2 < byteArrayLength) {
 					for (int j = 0; j < 2; j++) {
 						if (this.startIntArray[j] == Utility.byteToInteger(byteArray[index + j]) && j == 2 - 1) {
-							this.state = 1;
-							this.intArray = Utility.appendIntArrays(this.intArray, this.startIntArray);
+							this.state = ProtocolState.LENGTH;
+							intArray = Utility.appendIntArrays(intArray, this.startIntArray);
 							index += 2;
 						}
 					}
 					continue;
 				}
-				this.state = 9;
+				this.state = ProtocolState.BAD;
 				index += 2;
 				flag = false;
 				continue;
-			case 1:
+			case LENGTH:
 				for (i = 0; i < 2; i++) {
 					if (index + i < byteArrayLength)
 						this.lengthIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
 				}
 				this.length = Utility.intReverseMaskShifter(this.lengthIntArray, 8);
-				this.intArray = Utility.appendIntArrays(this.intArray, this.lengthIntArray);
-				this.dataLength = this.length - 18;
-				this.dataIntArray = new int[this.dataLength];
+				intArray = Utility.appendIntArrays(intArray, this.lengthIntArray);
+				dataLength = this.length - 18;
+				this.dataIntArray = new int[dataLength];
 				index += 2;
-				this.state = 2;
+				this.state = ProtocolState.VERSION;
 				continue;
-			case 2:
+			case VERSION:
 				this.versionIntArray = new int[3];
 				for (i = 0; i < 3; i++) {
 					if (index + i < byteArrayLength)
 						this.versionIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
 				}
-				this.intArray = Utility.appendIntArrays(this.intArray, this.versionIntArray);
+				intArray = Utility.appendIntArrays(intArray, this.versionIntArray);
 				this.version = Utility.intReverseMaskShifter(this.versionIntArray, 8);
 				index += 3;
-				this.state = 3;
+				this.state = ProtocolState.TYPE;
 				continue;
-			case 3:
+			case TYPE:
 				this.typeIntArray = new int[1];
 				for (i = 0; i < 1; i++) {
 					if (index + i < byteArrayLength)
 						this.typeIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
 				}
-				this.intArray = Utility.appendIntArrays(this.intArray, this.typeIntArray);
-				this.type = Utility.intReverseMaskShifter(this.typeIntArray, 8);
+				intArray = Utility.appendIntArrays(intArray, this.typeIntArray);
+				this.type = this.getProtocolType(Utility.intReverseMaskShifter(this.typeIntArray, 8));
 				index++;
-				this.state = 4;
+				this.state = ProtocolState.OFFSET;
 				continue;
-			case 4:
+			case OFFSET:
 				this.offsetIntArray = new int[4];
 				for (i = 0; i < 4; i++) {
 					if (index + i < byteArrayLength)
 						this.offsetIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
 				}
-				this.intArray = Utility.appendIntArrays(this.intArray, this.offsetIntArray);
+				intArray = Utility.appendIntArrays(intArray, this.offsetIntArray);
 				this.offset = Utility.intReverseMaskShifter(this.offsetIntArray, 8);
 				index += 4;
-				this.state = 5;
+				this.state = ProtocolState.ACKNOWLEDGE;
 				continue;
-			case 5:
+			case ACKNOWLEDGE:
 				this.acknowledgeIntArray = new int[4];
 				for (i = 0; i < 4; i++) {
 					if (index + i < byteArrayLength)
 						this.acknowledgeIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
 				}
-				this.intArray = Utility.appendIntArrays(this.intArray, this.acknowledgeIntArray);
+				intArray = Utility.appendIntArrays(intArray, this.acknowledgeIntArray);
 				this.acknowledge = Utility.intReverseMaskShifter(this.acknowledgeIntArray, 8);
 				index += 4;
-				this.state = 6;
+				this.state = ProtocolState.DATA;
 				continue;
-			case 6:
-				this.dataIntArray = new int[this.dataLength];
+			case DATA:
+				this.dataIntArray = new int[dataLength];
 				this.data = "";
-				for (i = 0; i < this.dataLength; i++) {
+				for (i = 0; i < dataLength; i++) {
 					if (index + i < byteArrayLength)
 						this.dataIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
-						this.data += (char) this.dataIntArray[i];
+					this.data += (char) this.dataIntArray[i];
 				}
-				this.intArray = Utility.appendIntArrays(this.intArray, this.dataIntArray);
-				index += this.dataLength;
-				this.state = 7;
+				intArray = Utility.appendIntArrays(intArray, this.dataIntArray);
+				index += dataLength;
+				this.state = ProtocolState.CRC;
 				continue;
-			case 7:
+			case CRC:
 				this.crcIntArray = new int[2];
 				for (i = 0; i < 2; i++) {
 					if (index + i < byteArrayLength)
@@ -259,23 +219,17 @@ public class Protocol {
 				}
 				index += 2;
 				integer = Utility.intReverseMaskShifter(this.crcIntArray, 8);
-				this.crc = computeCRC16One(this.intArray);
+				this.crc = computeCRC16One(intArray);
 				if (this.crc == integer) {
-					this.state = 8;
-					this.dataStringList = parse(this.dataIntArray);
-					
-					logger.info(this + ".deserialize(" + byteArray + ") GOOD");
+					this.state = ProtocolState.GOOD;
 				} else {
-					this.state = 9;
-					this.dataStringList = parse(this.dataIntArray);
-					
-					logger.info(this + ".deserialize(" + byteArray + ") BAD");
+					this.state = ProtocolState.BAD;
 				}
 				flag = false;
 				continue;
 			}
 			flag = false;
-			this.state = 9;
+			this.state = ProtocolState.BAD;
 		}
 		if (index <= byteArrayLength) {
 			byteArray = Arrays.copyOfRange(byteArray, index, byteArrayLength);
@@ -285,131 +239,94 @@ public class Protocol {
 		return byteArray;
 	}
 
+
+	@JsonIgnore
+	public Object serialize(Object object) {
+		if ((object instanceof byte[])) {
+			setByteArray((byte[]) object);
+		} else if ((object instanceof String)) {
+			setByteArray(((String) object).getBytes());
+		}
+		return object;
+	}
+
+	@JsonIgnore
+	public ProtocolType getType() {
+		return this.type;
+	}
+	@JsonIgnore
 	public int getMessageOffset() {
 		return this.offset;
 	}
-
+	@JsonIgnore
 	public int getMessageAcknowledged() {
 		return this.acknowledge;
 	}
-
-	public Object getObject() {
-		return this.object;
+	@JsonIgnore
+	public String getData() {
+		return this.data;
 	}
-
+	@JsonIgnore
 	public int getTryCount() {
 		return this.tryCount;
 	}
 
-	public int getType() {
-		return this.type;
-	}
-
-	public int getDataLength() {
-		return this.dataLength;
-	}
-
-	public int getState() {
+//	public int getDataLength() {
+//		return this.dataLength;
+//	}
+	@JsonIgnore
+	public ProtocolState getState() {
 		return this.state;
 	}
-
+	@JsonIgnore
 	public double getTimeout() {
 		return this.timeout;
 	}
-
+	@JsonIgnore
 	public byte[] getByteArray() {
 		return this.byteArray;
 	}
-
+	@JsonIgnore
 	public int getIndex() {
-		
+
 		logger.finest("getIndex() (this.index = " + this.index + ")");
-		
+
 		return this.index;
 	}
+//
+//	public byte[] getDataByteArray() {
+//		return this.dataByteArray;
+//	}
 
-	public byte[] getDataByteArray() {
-		return this.dataByteArray;
-	}
-
-	public List<String> parse(int[] intArray) {
-		ArrayList<String> stringList = new ArrayList();
-		int index = 0;
-
-		String string = "";
-		while (index < intArray.length) {
-			int integer = intArray[index];
-			if ((32 <= integer) && (integer <= 126)) {
-				string = string + (char) integer;
-			} else if (integer == 0) {
-				if (StringUtils.isNotBlank(string)) {
-					stringList.add(string);
-				}
-				string = "";
-			}
-			index++;
-		}
-		return stringList;
-	}
-
-	public void setObject(Object object) {
-		this.object = object;
-	}
-
+//	public void setObject(Object object) {
+//		this.object = object;
+//	}
+	@JsonIgnore
 	public void setTryCount(int tryCount) {
 		this.tryCount = tryCount;
 	}
-
+	@JsonIgnore
 	public void setMessageOffset(int messageOffset) {
 		this.offset = messageOffset;
 	}
-
+	@JsonIgnore
 	public void setMessageAcknowledged(int messageAcknowledge) {
 		this.acknowledge = messageAcknowledge;
 	}
-
-	public void setState(int state) {
-		this.state = state;
-	}
-
+	@JsonIgnore
 	public void setIndex(int index) {
 		this.index = index;
 	}
-
+	@JsonIgnore
 	public void setByteArray(byte[] byteArray) {
 		this.byteArray = byteArray;
-		
-			logger.finest(this + ".setByteArray(" + byteArray + ") (byteArray = "
-					+ Utility.byteArrayToByteArrayString(this.byteArray) + ")");
-		
+
+		logger.finest(this + ".setByteArray(" + byteArray + ") (byteArray = "
+				+ Utility.byteArrayToByteArrayString(this.byteArray) + ")");
+
 	}
-
-	public void setDataByteArray(byte[] dataByteArray) {
-		this.dataByteArray = dataByteArray;
-		
-		logger.finest(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
-					+ Utility.byteArrayToByteArrayString(this.dataByteArray) + ")");
-		
-	}
-
-	public int setByteCount(int byteCount) {
-		
-			logger.finest("setByteCount(" + byteCount + ")");
-		
-		return this.byteCount = byteCount;
-	}
-
-//  public String toString()
-//  {
-//    String string = super.toString();
-//    String stringPackage = getClass().getPackage().getName();
-//    if (stringPackage != null) {
-//      string = string.replaceFirst("^" + stringPackage + ".", "");
-//    }
-//    return string;
-//  }
-
-	public  int computeCRC8(int[] intArray) {
+	@JsonIgnore
+	public int computeCRC8(int[] intArray) {
 		int crc = 0;
 
 		int[] crcIntArray = { 0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
@@ -429,7 +346,7 @@ public class Protocol {
 		}
 		return crc;
 	}
-
+	@JsonIgnore
 	public int computeCRC8Two(int[] intArray) {
 		int crc = 0;
 		for (int i = 0; i < intArray.length; i++) {
@@ -452,14 +369,14 @@ public class Protocol {
 			intArrayString = intArrayString + "0x"
 					+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(i & 0xFF), 2) + ",";
 		}
-		
+
 		logger.fine("computeCRC8Two(" + intArray + ") (intArray = " + intArrayString + ") (crc = " + "0x"
-					+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(crc), 2) + " = "
-					+ Utility.getZeroFilledRightJustifiedString(Integer.toBinaryString(crc), 8) + "))");
-		
+				+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(crc), 2) + " = "
+				+ Utility.getZeroFilledRightJustifiedString(Integer.toBinaryString(crc), 8) + "))");
+
 		return crc;
 	}
-
+	@JsonIgnore
 	public static int computeCRC16Two(int[] intArray) {
 		int crc = 65535;
 		int intArrayLength = intArray.length;
@@ -480,7 +397,7 @@ public class Protocol {
 		}
 		return crc;
 	}
-
+	@JsonIgnore
 	public static int computeCRC16One(int[] intArray) {
 		int crc = 65535;
 		int intArrayLength = intArray.length;
@@ -492,6 +409,68 @@ public class Protocol {
 			crc = crc >> 8 ^ integer << 8 ^ integer << 3 ^ integer >> 4;
 		}
 		return crc;
+	}
+	@JsonIgnore
+	private int getType(ProtocolType protocolType) {
+		int type = 0;
+		switch (protocolType) {
+		case UNUSED: {
+			type = 1;
+			break;
+		}
+		case ADVERTISEMENT: {
+			type = 2;
+			break;
+		}
+		case MESSAGE: {
+			type = 3;
+			break;
+		}
+		case CONNECT: {
+			type = 4;
+			break;
+		}
+		case DISCONNECT: {
+			type = 5;
+			break;
+		}
+		case RESEND: {
+			type = 6;
+			break;
+		}
+		}
+		return type;
+	}
+	@JsonIgnore
+	private ProtocolType getProtocolType(int type) {
+		ProtocolType protocolType = ProtocolType.UNUSED;
+		switch (type) {
+		case 1: {
+			protocolType = ProtocolType.UNUSED;
+			break;
+		}
+		case 2: {
+			protocolType = ProtocolType.ADVERTISEMENT;
+			break;
+		}
+		case 3: {
+			protocolType = ProtocolType.MESSAGE;
+			break;
+		}
+		case 4: {
+			protocolType = ProtocolType.CONNECT;
+			break;
+		}
+		case 5: {
+			protocolType = ProtocolType.DISCONNECT;
+			break;
+		}
+		case 6: {
+			protocolType = ProtocolType.RESEND;
+			break;
+		}
+		}
+		return protocolType;
 	}
 
 	@Override
@@ -506,3 +485,111 @@ public class Protocol {
 		return string;
 	}
 }
+
+//public List<String> parse(int[] intArray) {
+//ArrayList<String> stringList = new ArrayList();
+//int index = 0;
+//
+//String string = "";
+//while (index < intArray.length) {
+//	int integer = intArray[index];
+//	if ((32 <= integer) && (integer <= 126)) {
+//		string = string + (char) integer;
+//	} else if (integer == 0) {
+//		if (StringUtils.isNotBlank(string)) {
+//			stringList.add(string);
+//		}
+//		string = "";
+//	}
+//	index++;
+//}
+//return stringList;
+//}
+
+//	public byte getAddress() {
+//		return this.address;
+//	}
+//
+//	public void setAddress(byte address) {
+//		this.address = address;
+//	}
+// public static final int START = 0;
+//public static final int LENGTH = 1;
+//public static final int VERSION = 2;
+//public static final int TYPE = 3;
+//public static final int OFFSET = 4;
+//public static final int ACKNOWLEDGE = 5;
+//public static final int DATA = 6;
+//public static final int CRC = 7;
+//public static final int GOOD = 8;
+//public static final int BAD = 9;
+//
+//public static final int UNUSED = 1;
+//public static final int ADVERTISEMENT = 2;
+//public static final int MESSAGE = 3;
+//public static final int CONNECT = 4;
+//public static final int DISCONNECT = 5;
+//public static final int RESEND_REQUEST = 6;
+
+//protected final int startLength = 2;
+//protected final int lengthLength = 2;
+//protected final int versionLength = 3;
+//protected final int typeLength = 1;
+//protected final int offsetLength = 4;
+//protected final int acknowledgeLength = 4;
+//
+
+//protected int dataLength = 0;
+//protected final int crcLength = 2;
+
+// protected byte address;
+//protected boolean checkSum = false;
+
+// public Object deserialize(Object object)
+// {
+// if ((object instanceof byte[]))
+// {
+// object = new String(this.byteArray);
+// this.state = 8;
+// }
+// return object;
+// }
+
+
+//public Object deserialize(Object object)
+//{
+//if ((object instanceof byte[]))
+//{
+//  object = new String(this.byteArray);
+//  this.state = 8;
+//}
+//return object;
+//}
+
+//protected int byteCount;
+//protected int byteArrayLength;
+
+//protected byte[] dataByteArray = new byte[0];
+
+//public byte getAddress() {
+//return this.address;
+//}
+//
+//public void setAddress(byte address) {
+//this.address = address;
+//}
+
+//public void setDataByteArray(byte[] dataByteArray) {
+//this.dataByteArray = dataByteArray;
+//
+//logger.finest(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
+//		+ Utility.byteArrayToByteArrayString(this.dataByteArray) + ")");
+//
+//}
+
+//public int setByteCount(int byteCount) {
+//
+//logger.finest("setByteCount(" + byteCount + ")");
+//
+//return this.byteCount = byteCount;
+//}

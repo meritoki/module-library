@@ -2,7 +2,10 @@ package com.meritoki.module.library.model.protocol;
 
 public enum ProtocolType {
 
-	MESSAGE,
-	ADVERTISEMENT,
-	DISCONNECT
+	UNUSED,//1
+	ADVERTISEMENT,//2
+	MESSAGE,//3
+	CONNECT,//4
+	DISCONNECT,//5
+	RESEND//6
 }
