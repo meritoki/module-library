@@ -21,6 +21,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import com.meritoki.module.library.model.data.Data;
+import com.meritoki.module.library.model.data.DataType;
+
 public class Delay extends Node {
 	private List<Object> objectList;
 	private double delayMax = 999.0D;
@@ -109,6 +112,6 @@ public class Delay extends Node {
 	}
 
 	protected void inputData(Object object) {
-		add(new Data(this.id.intValue(), this.id.intValue(), 2, 0.0D, object, null));
+		add(new Data(this.id.intValue(), this.id.intValue(), DataType.INPUT, 0.0D, object, null));
 	}
 }

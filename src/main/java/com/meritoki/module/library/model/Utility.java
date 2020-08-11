@@ -33,15 +33,17 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import com.meritoki.module.library.model.protocol.Protocol;
 
 public class Utility
 {
-  protected static Logger logger = LogManager.getLogger(Utility.class);
+	protected static Logger logger = Logger.getLogger(Utility.class.getName());
   
   public static String formatDate(String timeZone, String pattern, Date date)
   {
@@ -253,7 +255,7 @@ public class Utility
     }
     catch (NumberFormatException e)
     {
-      logger.error("stringToShort(" + string + ") NumberFormatException");
+      logger.warning("stringToShort(" + string + ") NumberFormatException");
     }
     return s;
   }
@@ -267,7 +269,7 @@ public class Utility
     }
     catch (NumberFormatException e)
     {
-      logger.error("stringToInt(" + string + ") NumberFormatException");
+      logger.warning("stringToInt(" + string + ") NumberFormatException");
     }
     return s;
   }
@@ -284,7 +286,7 @@ public class Utility
         }
         catch (NumberFormatException e)
         {
-          logger.error("stringToByte(" + string + ") NumberFormatException");
+          logger.warning("stringToByte(" + string + ") NumberFormatException");
         }
       }
     }
@@ -398,11 +400,8 @@ public class Utility
         value = Integer.parseInt(string);
       }
       catch (NumberFormatException e)
-      {
-        if ((logger != null) && 
-          (logger.isDebugEnabled())) {
-          logger.debug("stringToInteger(" + string + ") NumberFormatException");
-        }
+      {  
+          logger.fine("stringToInteger(" + string + ") NumberFormatException"); 
       }
     }
     return value;
@@ -471,7 +470,7 @@ public class Utility
       catch (NumberFormatException e)
       {
         {
-          logger.trace("Entity.stringToDouble(" + string + ") NumberFormatException");
+          logger.finest("Entity.stringToDouble(" + string + ") NumberFormatException");
         }
       }
     }
@@ -513,11 +512,11 @@ public class Utility
       }
       catch (NoSuchAlgorithmException e)
       {
-        logger.error("newHashString(...) NoSuchAlgorithmException");
+        logger.warning("newHashString(...) NoSuchAlgorithmException");
       }
       catch (UnsupportedEncodingException e)
       {
-        logger.error("newHashString(...) UnsupportedEncodingException");
+        logger.warning("newHashString(...) UnsupportedEncodingException");
       }
     }
     return hash;
@@ -583,7 +582,7 @@ public class Utility
         }
         string = stringBuilder.toString();
 
-        logger.trace("getKeyAttributeName(" + string + ")");
+        logger.finest("getKeyAttributeName(" + string + ")");
 
       }
     }
@@ -651,7 +650,7 @@ public class Utility
     }
     string = stringBuilder.toString();
 
-    logger.trace("getKeyClassName(" + clazz + ") (string = " + string + ")");
+    logger.finest("getKeyClassName(" + clazz + ") (string = " + string + ")");
 
     return string;
   }
@@ -671,7 +670,7 @@ public class Utility
         }
         catch (IllegalArgumentException e)
         {
-          logger.error("getCurrencySymbol(" + numericCurrencyCode + ") IllegalArgumentException");
+          logger.warning("getCurrencySymbol(" + numericCurrencyCode + ") IllegalArgumentException");
         }
       }
     }
@@ -766,9 +765,7 @@ public class Utility
     int nibbleTwo = c << 4 | c ^ 0xF;
     intArray[0] = nibbleOne;
     intArray[1] = nibbleTwo;
-    if (Protocol.logger.isDebugEnabled()) {
-      Protocol.logger.debug("intComplement(0x" + getZeroFilledRightJustifiedString(Integer.toHexString(integer), 2) + ") (nibbleOne = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleOne), 2) + ") (nibbleTwo = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleTwo), 2) + ")");
-    }
+    logger.fine("intComplement(0x" + getZeroFilledRightJustifiedString(Integer.toHexString(integer), 2) + ") (nibbleOne = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleOne), 2) + ") (nibbleTwo = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleTwo), 2) + ")");
     return intArray;
   }
   
@@ -780,13 +777,13 @@ public class Utility
       int nibbleOne = 0xF0 & intArray[0];
       int nibbleTwo = (0xF0 & intArray[1]) >> 4;
       integer = nibbleOne | nibbleTwo;
-      if (Protocol.logger.isDebugEnabled()) {
-        Protocol.logger.debug("intUncomplement(" + intArray + ") ((0xf0&(" + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(intArray[0]), 2) + ")) = nibbleOne = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleOne), 2) + ") ((0xf0&(" + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(intArray[1]), 2) + "))>>4) = nibbleTwo = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleTwo), 2) + ") (integer = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(integer), 2) + ")");
-      }
+     
+      logger.fine("intUncomplement(" + intArray + ") ((0xf0&(" + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(intArray[0]), 2) + ")) = nibbleOne = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleOne), 2) + ") ((0xf0&(" + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(intArray[1]), 2) + "))>>4) = nibbleTwo = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(nibbleTwo), 2) + ") (integer = " + "0x" + getZeroFilledRightJustifiedString(Integer.toHexString(integer), 2) + ")");
+      
     }
     else
     {
-      Protocol.logger.warn("intUncomplement(" + intArray + ") (intArray.length != 2)");
+      logger.warning("intUncomplement(" + intArray + ") (intArray.length != 2)");
     }
     return integer;
   }

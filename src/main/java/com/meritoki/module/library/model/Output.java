@@ -19,12 +19,14 @@ package com.meritoki.module.library.model;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.meritoki.module.library.model.data.Data;
+import com.meritoki.module.library.model.protocol.Protocol;
+
 public class Output extends Node {
 	protected OutputStream outputStream = null;
 
 	public Output(int id, Module module, OutputStream outputStream) {
 		super(Integer.valueOf(id), module);
-		logger.debug("Output("+id+", "+module+", "+outputStream+")");
 		this.outputStream = outputStream;
 	}
 
@@ -51,7 +53,7 @@ public class Output extends Node {
 				this.outputStream.flush();
 				logger.info("output("+object+") written");
 			} catch (IOException e) {
-				logger.error("output(" + object + ") IOException");
+				logger.severe("output(" + object + ") IOException");
 				setState(0);
 			}
 		}
@@ -60,27 +62,32 @@ public class Output extends Node {
 	@Override
 	protected void inputState(Object object) {
 		if ((object instanceof Data)) {
-			Data container = (Data) object;
-			object = container.getObject();
-			switch (container.getType()) {
-			case 1:
+			Data data = (Data) object;
+			object = data.getObject();
+			switch (data.getType()) {
+			case OUTPUT:{
 				output(object);
+				break;
+			}
+			default: {
+				logger.warning("inputState("+object+") !DataType.OUTPUT");
+			}
 			}
 		}
 	}
 	
 	protected void outputStreamClose(OutputStream outputStream) {
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".outputStreamClose(" + outputStream + ")");
-		}
+
+		logger.finest(this + ".outputStreamClose(" + outputStream + ")");
+		
 		if (outputStream != null) {
 			try {
 				outputStream.close();
 			} catch (IOException e) {
-				logger.warn(this + ".outputStreamClose(" + outputStream + ") IOException");
+				logger.warning(this + ".outputStreamClose(" + outputStream + ") IOException");
 			}
 		} else {
-			logger.warn(this + ".outputStreamClose(" + outputStream + ") (outputStream = null)");
+			logger.warning(this + ".outputStreamClose(" + outputStream + ") (outputStream = null)");
 		}
 	}
 }

@@ -16,13 +16,10 @@ limitations under the License.
 
 package com.meritoki.module.library.model;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-
-import javax.management.MBeanServer;
 
 public class State extends Module {
 	public static final int DEFAULT = 0;
@@ -84,13 +81,13 @@ public class State extends Module {
 			defaultState(object);
 			break;
 		default:
-			logger.debug("machine(...) NO STATE");
+			logger.fine("machine(...) NO STATE");
 		}
 	}
 	
 	protected void defaultState(Object object) {
 		if (delayExpired()) {
-			logger.info("defaultState(...)");
+			logger.info("defaultState("+object+")");
 			setDelay(newDelay(this.defaultDelay));
 		}
 	}

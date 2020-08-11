@@ -2,6 +2,10 @@ package com.meritoki.module.library.model;
 
 import java.util.concurrent.CountDownLatch;
 
+import com.meritoki.module.library.model.data.Data;
+import com.meritoki.module.library.model.data.DataType;
+import com.meritoki.module.library.model.protocol.Protocol;
+
 public class Client extends Web {
 	
 	public static void main(String[] args) {
@@ -15,7 +19,7 @@ public class Client extends Web {
 		Protocol protocol = new Protocol();
 		protocol.serialize(Protocol.MESSAGE,client.protocol.getMessageOffset(),client.protocol.getMessageAcknowledged(), "{Hello World}");
 		
-		client.add(new Data(0,0,Data.OUTPUT,0,protocol,null));
+		client.add(new Data(0,0,DataType.OUTPUT,0,protocol,null));
 	}
 	
 	public Client(int id) {

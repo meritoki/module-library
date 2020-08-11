@@ -24,11 +24,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
-import javax.management.MBeanServer;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -108,55 +106,55 @@ public class Web extends Network {
 		}
 		if ((StringUtils.isNotBlank(this.connection)) && (this.connection.equalsIgnoreCase("sslsocket"))) {
 			if (!StringUtils.isBlank(this.javaxNETSSLKeyStorePath)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("initialize() (this.javaNETSSLKeyStorePath= " + this.javaxNETSSLKeyStorePath + ")");
+				 {
+					logger.fine("initialize() (this.javaNETSSLKeyStorePath= " + this.javaxNETSSLKeyStorePath + ")");
 				}
 				File javaxNETSSLKeyStoreFile = new File(this.javaxNETSSLKeyStorePath);
 				if (javaxNETSSLKeyStoreFile.exists()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("initialize() (javaNETSSLKeyStoreFile= " + javaxNETSSLKeyStoreFile + ")");
+					 {
+						logger.fine("initialize() (javaNETSSLKeyStoreFile= " + javaxNETSSLKeyStoreFile + ")");
 					}
 					System.setProperty("javax.net.ssl.keyStore", this.javaxNETSSLKeyStorePath);
 				} else {
-					logger.warn("initialize() (!javaNETSSLKeyStoreFile.exists())");
+					logger.warning("initialize() (!javaNETSSLKeyStoreFile.exists())");
 				}
 			}
 			if (StringUtils.isNotBlank(this.javaxNETSSLKeyStorePassword)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("initialize() (this.javaxNETSSLKeyStorePassword = ********)");
+				 {
+					logger.fine("initialize() (this.javaxNETSSLKeyStorePassword = ********)");
 				}
 				System.setProperty("javax.net.ssl.keyStorePassword", this.javaxNETSSLKeyStorePassword);
 			}
 			if (StringUtils.isNotBlank(this.javaxNETSSLTrustStorePath)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("initialize() (this.javaxNETSSLTrustStore = " + this.javaxNETSSLTrustStorePath + ")");
+				 {
+					logger.fine("initialize() (this.javaxNETSSLTrustStore = " + this.javaxNETSSLTrustStorePath + ")");
 				}
 				File javaxNETSSLTrustStoreFile = new File(this.javaxNETSSLTrustStorePath);
 				if (javaxNETSSLTrustStoreFile.exists()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("initialize() (javaNETSSLTrustStoreFile= " + javaxNETSSLTrustStoreFile + ")");
+					 {
+						logger.fine("initialize() (javaNETSSLTrustStoreFile= " + javaxNETSSLTrustStoreFile + ")");
 					}
 					System.setProperty("javax.net.ssl.trustStore", this.javaxNETSSLTrustStorePath);
 				} else {
-					logger.warn("initialize() (!javaNETSSLTrustStoreFile.exists())");
+					logger.warning("initialize() (!javaNETSSLTrustStoreFile.exists())");
 				}
 			}
 			if (StringUtils.isNotBlank(this.javaxNETSSLTrustStorePassword)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("initialize() (this.javaxNETSSLTrustStorePassword = ********)");
+				 {
+					logger.fine("initialize() (this.javaxNETSSLTrustStorePassword = ********)");
 				}
 				System.setProperty("javax.net.ssl.trustStorePassword", this.javaxNETSSLTrustStorePassword);
 			}
 			if (StringUtils.isNotBlank(this.javaxProtocolHandlerPKGS)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(
+				 {
+					logger.fine(
 							"initialize() (this.javaxProtocolHandlerPKGS = " + this.javaxProtocolHandlerPKGS + ")");
 				}
 				System.setProperty("javax.protocol.handler.pkgs", this.javaxProtocolHandlerPKGS);
 			}
 			if (StringUtils.isNotBlank(this.javaxNETDebug)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("initialize() (this.javaxNETDebug = " + this.javaxNETDebug + ")");
+				 {
+					logger.fine("initialize() (this.javaxNETDebug = " + this.javaxNETDebug + ")");
 				}
 				System.setProperty("javax.net.debug", this.javaxNETDebug);
 			}
@@ -206,21 +204,21 @@ public class Web extends Network {
 	@Override
 	protected boolean connection(Object object) {
 		if ((object instanceof SSLSocket)) {
-			if (logger.isDebugEnabled()) {
+			 {
 				logger.info("connection(" + object + ") (object instanceof SSLSocket)");
 			}
 			SSLSocket sslSocket = (SSLSocket) object;
-			this.input = new Input(this.id.intValue(), this, getSSLSocketInputStream(sslSocket));
-			this.output = new Output(this.id.intValue(), this, getSSLSocketOutputStream(sslSocket));
-			this.delay = new Delay(this.id.intValue(), this);
+			this.input = newInput(this.id.intValue(), this, getSSLSocketInputStream(sslSocket));
+			this.output = newOutput(this.id.intValue(), this, getSSLSocketOutputStream(sslSocket));
+			this.delay = newDelay(this.id.intValue(), this);
 		} else if ((object instanceof Socket)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("connection(" + object + ") (object instanceof Socket)");
+			 {
+				logger.fine("connection(" + object + ") (object instanceof Socket)");
 			}
 			Socket socket = (Socket) object;
-			this.input = new Input(this.id.intValue(), this, getSocketInputStream(socket));
-			this.output = new Output(this.id.intValue(), this, getSocketOutputStream(socket));
-			this.delay = new Delay(this.id.intValue(), this);
+			this.input = newInput(this.id.intValue(), this, getSocketInputStream(socket));
+			this.output = newOutput(this.id.intValue(), this, getSocketOutputStream(socket));
+			this.delay = newDelay(this.id.intValue(), this);
 		}
 		return this.connectionStart();
 	}
@@ -241,45 +239,45 @@ public class Web extends Network {
 		return httpURL;
 	}
 
-	protected static InputStream getSSLSocketInputStream(SSLSocket sslSocket) {
+	protected InputStream getSSLSocketInputStream(SSLSocket sslSocket) {
 		InputStream inputStream = null;
 		try {
 			inputStream = sslSocket.getInputStream();
 		} catch (IOException e) {
-			logger.warn("getSSLSocketInputStream(" + sslSocket + ") IOException");
+			logger.warning("getSSLSocketInputStream(" + sslSocket + ") IOException");
 		}
 		return inputStream;
 	}
 
-	protected static InputStream getSocketInputStream(Socket socket) {
+	protected InputStream getSocketInputStream(Socket socket) {
 		InputStream inputStream = null;
 		try {
 			inputStream = socket.getInputStream();
 		} catch (IOException e) {
-			logger.warn("getSocketInputStream(" + socket + ") IOException");
+			logger.warning("getSocketInputStream(" + socket + ") IOException");
 		}
 		return inputStream;
 	}
 
-	protected static OutputStream getSSLSocketOutputStream(SSLSocket sslSocket) {
+	protected OutputStream getSSLSocketOutputStream(SSLSocket sslSocket) {
 		OutputStream outputStream = null;
 		if (sslSocket != null) {
 			try {
 				outputStream = sslSocket.getOutputStream();
 			} catch (IOException e) {
-				logger.warn("getSSLSocketOutputStream(" + sslSocket + ") IOException");
+				logger.warning("getSSLSocketOutputStream(" + sslSocket + ") IOException");
 			}
 		}
 		return outputStream;
 	}
 
-	protected static OutputStream getSocketOutputStream(Socket socket) {
+	protected OutputStream getSocketOutputStream(Socket socket) {
 		OutputStream outputStream = null;
 		if (socket != null) {
 			try {
 				outputStream = socket.getOutputStream();
 			} catch (IOException e) {
-				logger.warn("getSocketOutputStream(" + socket + ") IOException");
+				logger.warning("getSocketOutputStream(" + socket + ") IOException");
 			}
 		}
 		return outputStream;
@@ -290,7 +288,7 @@ public class Web extends Network {
 			try {
 				sslSocket.close();
 			} catch (IOException e) {
-				logger.warn("sslSocketClose(" + sslSocket + ") IOException");
+				logger.warning("sslSocketClose(" + sslSocket + ") IOException");
 			}
 		}
 	}
@@ -300,7 +298,7 @@ public class Web extends Network {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				logger.warn(this + ".socketClose(" + socket + ") IOException");
+				logger.warning(this + ".socketClose(" + socket + ") IOException");
 			}
 		}
 	}
@@ -313,10 +311,10 @@ public class Web extends Network {
 				sslSocket = (SSLSocket) ssLSocketFactory.createSocket();
 				sslSocket.connect(new InetSocketAddress(hostAddress, port), timeout);
 			} catch (UnknownHostException e) {
-				logger.warn("newSSlSocket(" + hostAddress + ", " + port + ", " + timeout + ") UnknownHostException");
+				logger.warning("newSSlSocket(" + hostAddress + ", " + port + ", " + timeout + ") UnknownHostException");
 				sslSocket = null;
 			} catch (IOException e) {
-				logger.warn("newSSlSocket(" + hostAddress + ", " + port + ", " + timeout + ") IOException");
+				logger.warning("newSSlSocket(" + hostAddress + ", " + port + ", " + timeout + ") IOException");
 				sslSocket = null;
 			}
 		}
@@ -340,10 +338,10 @@ public class Web extends Network {
 				socket = new Socket();
 				socket.connect(new InetSocketAddress(hostAddress, port), timeout);
 			} catch (UnknownHostException e) {
-				logger.warn("getSocket(" + hostAddress + ", " + port + ", " + timeout + ") UnknownHostException");
+				logger.warning("getSocket(" + hostAddress + ", " + port + ", " + timeout + ") UnknownHostException");
 				socket = null;
 			} catch (IOException e) {
-				logger.warn("getSocket(" + hostAddress + ", " + port + ", " + timeout + ") IOException");
+				logger.warning("getSocket(" + hostAddress + ", " + port + ", " + timeout + ") IOException");
 				socket = null;
 			}
 		}
@@ -399,7 +397,7 @@ public class Web extends Network {
 		try {
 			sslSocket = (SSLSocket) sslServerSocket.accept();
 		} catch (IOException e) {
-			logger.warn("sslServerSocketAccept(" + sslServerSocket + ") IOException");
+			logger.warning("sslServerSocketAccept(" + sslServerSocket + ") IOException");
 		}
 		return sslSocket;
 	}
@@ -410,14 +408,14 @@ public class Web extends Network {
 		try {
 			socket = serverSocket.accept();
 		} catch (IOException e) {
-			logger.warn("serverSocketAccept(" + serverSocket + ") IOException");
+			logger.warning("serverSocketAccept(" + serverSocket + ") IOException");
 		}
 		return socket;
 	}
 
 	protected SSLServerSocket newSSLServerSocket(int port, int timeout) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("newSSLServerSocket(" + port + ", " + timeout + ")");
+		 {
+			logger.fine("newSSLServerSocket(" + port + ", " + timeout + ")");
 		}
 		SSLServerSocket sslServerSocket = null;
 		if ((port != -1) && (timeout != -1) && (port > 0) && (port < 65535)) {
@@ -427,7 +425,7 @@ public class Web extends Network {
 				sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(port);
 				sslServerSocketSetSoTimeout(sslServerSocket, timeout);
 			} catch (IOException e) {
-				logger.warn("newSSLServerSocket(" + port + ", " + timeout + ") IOException");
+				logger.warning("newSSLServerSocket(" + port + ", " + timeout + ") IOException");
 			}
 		}
 		if (sslServerSocket != null) {
@@ -442,8 +440,8 @@ public class Web extends Network {
 	}
 
 	protected ServerSocket newServerSocket(int port, int timeout) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("newServerSocket(" + port + ", " + timeout + ")");
+		 {
+			logger.fine("newServerSocket(" + port + ", " + timeout + ")");
 		}
 		ServerSocket serverSocket = null;
 		if ((port != -1) && (timeout != -1) && (port > 0) && (port < 65535)) {
@@ -451,7 +449,7 @@ public class Web extends Network {
 				serverSocket = new ServerSocket(port);
 				serverSocketSetSoTimeout(serverSocket, timeout);
 			} catch (IOException e) {
-				logger.warn("newServerSocket(" + port + ", " + timeout + ") IOException");
+				logger.warning("newServerSocket(" + port + ", " + timeout + ") IOException");
 			}
 		}
 		if (serverSocket != null) {
@@ -466,28 +464,28 @@ public class Web extends Network {
 	}
 
 	protected void sslServerSocketClose(SSLServerSocket sslServerSocket) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("sslServerSocketClose(" + sslServerSocket + ")");
+		 {
+			logger.fine("sslServerSocketClose(" + sslServerSocket + ")");
 		}
 		if (sslServerSocket != null) {
 			try {
 				sslServerSocket.close();
 			} catch (IOException e) {
-				logger.warn("sslServerSocketClose(" + sslServerSocket + ") IOException");
+				logger.warning("sslServerSocketClose(" + sslServerSocket + ") IOException");
 			}
 		}
 	}
 
 	protected void serverSocketClose(ServerSocket serverSocket) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(this + ".serverSocketClose(" + serverSocket + ")");
+		 {
+			logger.fine(this + ".serverSocketClose(" + serverSocket + ")");
 		}
 		if (serverSocket != null) {
 			try {
 				serverSocket.close();
 				serverSocket = null;
 			} catch (IOException e) {
-				logger.warn(this + ".serverSocketClose(" + serverSocket + ") IOException");
+				logger.warning(this + ".serverSocketClose(" + serverSocket + ") IOException");
 			}
 		}
 	}
@@ -496,7 +494,7 @@ public class Web extends Network {
 		try {
 			sslServerSocket.setSoTimeout(timeout);
 		} catch (SocketException e) {
-			logger.warn("sslServerSocketSetSoTimeout(" + sslServerSocket + ", " + timeout + ") SocketException");
+			logger.warning("sslServerSocketSetSoTimeout(" + sslServerSocket + ", " + timeout + ") SocketException");
 		}
 	}
 
@@ -505,7 +503,7 @@ public class Web extends Network {
 		try {
 			serverSocket.setSoTimeout(timeout);
 		} catch (SocketException e) {
-			logger.warn("serverSocketSetSoTimeout(" + serverSocket + ", " + timeout + ") SocketException");
+			logger.warning("serverSocketSetSoTimeout(" + serverSocket + ", " + timeout + ") SocketException");
 		}
 	}
 }

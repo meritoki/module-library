@@ -18,7 +18,10 @@ package com.meritoki.module.library.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+
+import com.meritoki.module.library.model.data.Data;
+import com.meritoki.module.library.model.data.DataType;
+import com.meritoki.module.library.model.protocol.Protocol;
 
 public class Input extends Node {
 	protected InputStream inputStream = null;
@@ -29,7 +32,6 @@ public class Input extends Node {
 
 	public Input(int id, Module module, InputStream inputStream) {
 		super(Integer.valueOf(id), module);
-		logger.debug("Input("+id+", "+module+", "+inputStream+")");
 		this.inputStream = inputStream;
 	}
 
@@ -66,7 +68,6 @@ public class Input extends Node {
 				switch (protocol.getState()) {
 				case Protocol.GOOD:
 					logger.info("input(...) Protocol.GOOD protocol.data="+protocol.data);
-					this.poll = true;
 					inputData(protocol);
 					break;
 				case Protocol.BAD:
@@ -74,7 +75,7 @@ public class Input extends Node {
 				}
 			}
 		} catch (IOException e) {
-			logger.fatal("input(object) IOException");
+			logger.severe("input(object) IOException");
 			setState(0);
 		}
 //		if (delayExpired()) {
@@ -84,10 +85,10 @@ public class Input extends Node {
 //					this.poll = false;
 //					inputData(Boolean.valueOf(this.poll));
 //					setDelay(newDelay(this.waitForInputMaxDelay));
-//					logger.warn("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
+//					logger.warning("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
 //							+ ")))");
 //				} else {
-//					logger.warn("input() this.delayExpired()");
+//					logger.warning("input() this.delayExpired()");
 //					setState(0);
 //				}
 //				break;
@@ -97,25 +98,21 @@ public class Input extends Node {
 
 	protected void inputData(Object object) {
 		if (object != null) {
-			if (logger.isDebugEnabled()) {
-				logger.trace("inputContainer(" + object + ")");
-			}
-			this.rootAdd(new Data(this.id.intValue(), this.id.intValue(), 2, 0.0D, object, null));
+			logger.finest("inputContainer(" + object + ")");
+			this.rootAdd(new Data(this.id.intValue(), this.id.intValue(), DataType.INPUT, 0.0D, object, null));
 		}
 	}
 	
 	protected void inputStreamClose(InputStream inputStream) {
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".inputStreamClose(" + inputStream + ")");
-		}
+		logger.finest(this + ".inputStreamClose(" + inputStream + ")");
 		if (inputStream != null) {
 			try {
 				inputStream.close();
 			} catch (IOException e) {
-				logger.warn(this + ".inputStreamClose(" + inputStream + ") IOException");
+				logger.warning(this + ".inputStreamClose(" + inputStream + ") IOException");
 			}
 		} else {
-			logger.warn(this + ".inputStreamClose(" + inputStream + ") (inputStream = " + inputStream + ")");
+			logger.warning(this + ".inputStreamClose(" + inputStream + ") (inputStream = " + inputStream + ")");
 		}
 	}
 }

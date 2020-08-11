@@ -1,4 +1,4 @@
-package com.meritoki.module.library.model;
+package com.meritoki.module.library.model.data;
 
 import java.io.IOException;
 
@@ -21,32 +21,31 @@ limitations under the License.
 
 import java.util.Date;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class Data
 {
-  protected static Logger logger = LogManager.getLogger(Data.class);
-  public static final int INPUT = 2;
-  public static final int OUTPUT = 1;
-  public static final int POLL = 10;
-  public static final int ACKNOWLEDGE = 1233;
-  public static final int DELAY = 99948823;
-  public static final int BLOCK = 13;
-  public static final int UNBLOCK = 14;
+	protected Logger logger = Logger.getLogger(Data.class.getName());
+//  public static final int INPUT = 2;
+//  public static final int OUTPUT = 1;
+//  public static final int POLL = 10;
+//  public static final int ACKNOWLEDGE = 1233;
+//  public static final int DELAY = 99948823;
+//  public static final int BLOCK = 13;
+//  public static final int UNBLOCK = 14;
   protected int destinationID;
   protected int sourceId;
-  protected int type;
+  protected DataType type;
   private double delayTime = 0.0D;
   protected Object object;
   private List<Object> outputObjectList;
   private double creationTime = 0.0D;
   private double expirationTime = 0.0D;
   
-  public Data(int destinationId, int sourceId, int type, double delayTime, Object object, List<Object> outputObjectList)
+  public Data(int destinationId, int sourceId, DataType type, double delayTime, Object object, List<Object> outputObjectList)
   {
     this.destinationID = destinationId;
     this.sourceId = sourceId;
@@ -71,7 +70,7 @@ public class Data
     return this.sourceId;
   }
   
-  public int getType()
+  public DataType getType()
   {
     return this.type;
   }
@@ -129,7 +128,7 @@ public class Data
 		try {
 			string = ow.writeValueAsString(this);
 		} catch (IOException ex) {
-			logger.error("IOException " + ex.getMessage());
+			logger.warning("IOException " + ex.getMessage());
 		}
 		return string;
 	}

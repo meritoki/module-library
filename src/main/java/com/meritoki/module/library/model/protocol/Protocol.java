@@ -14,21 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
-package com.meritoki.module.library.model;
+package com.meritoki.module.library.model.protocol;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.meritoki.module.library.model.Module;
+import com.meritoki.module.library.model.Utility;
 
-public class Protocol implements ProtocolInterface {
-	public static final Logger logger = LogManager.getLogger(Protocol.class);
+public class Protocol {
+	protected Logger logger = Logger.getLogger(Protocol.class.getName());
 	public static final int START = 0;
 	public static final int LENGTH = 1;
 	public static final int VERSION = 2;
@@ -39,12 +41,14 @@ public class Protocol implements ProtocolInterface {
 	public static final int CRC = 7;
 	public static final int GOOD = 8;
 	public static final int BAD = 9;
+	//
 	public static final int UNUSED = 1;
 	public static final int ADVERTISEMENT = 2;
 	public static final int MESSAGE = 3;
 	public static final int CONNECT = 4;
 	public static final int DISCONNECT = 5;
 	public static final int RESEND_REQUEST = 6;
+	//
 	protected int[] intArray = new int[0];
 	protected final int startLength = 2;
 	protected final int lengthLength = 2;
@@ -318,9 +322,9 @@ public class Protocol implements ProtocolInterface {
 	}
 
 	public int getIndex() {
-		if (logger.isDebugEnabled()) {
-			logger.trace("getIndex() (this.index = " + this.index + ")");
-		}
+		
+		logger.finest("getIndex() (this.index = " + this.index + ")");
+		
 		return this.index;
 	}
 
@@ -374,24 +378,24 @@ public class Protocol implements ProtocolInterface {
 
 	public void setByteArray(byte[] byteArray) {
 		this.byteArray = byteArray;
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".setByteArray(" + byteArray + ") (byteArray = "
+		
+			logger.finest(this + ".setByteArray(" + byteArray + ") (byteArray = "
 					+ Utility.byteArrayToByteArrayString(this.byteArray) + ")");
-		}
+		
 	}
 
 	public void setDataByteArray(byte[] dataByteArray) {
 		this.dataByteArray = dataByteArray;
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
+		
+		logger.finest(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
 					+ Utility.byteArrayToByteArrayString(this.dataByteArray) + ")");
-		}
+		
 	}
 
 	public int setByteCount(int byteCount) {
-		if (logger.isDebugEnabled()) {
-			logger.trace("setByteCount(" + byteCount + ")");
-		}
+		
+			logger.finest("setByteCount(" + byteCount + ")");
+		
 		return this.byteCount = byteCount;
 	}
 
@@ -405,7 +409,7 @@ public class Protocol implements ProtocolInterface {
 //    return string;
 //  }
 
-	public static int computeCRC8(int[] intArray) {
+	public  int computeCRC8(int[] intArray) {
 		int crc = 0;
 
 		int[] crcIntArray = { 0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
@@ -426,7 +430,7 @@ public class Protocol implements ProtocolInterface {
 		return crc;
 	}
 
-	public static int computeCRC8Two(int[] intArray) {
+	public int computeCRC8Two(int[] intArray) {
 		int crc = 0;
 		for (int i = 0; i < intArray.length; i++) {
 			int byteInt = intArray[i];
@@ -448,11 +452,11 @@ public class Protocol implements ProtocolInterface {
 			intArrayString = intArrayString + "0x"
 					+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(i & 0xFF), 2) + ",";
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("computeCRC8Two(" + intArray + ") (intArray = " + intArrayString + ") (crc = " + "0x"
+		
+		logger.fine("computeCRC8Two(" + intArray + ") (intArray = " + intArrayString + ") (crc = " + "0x"
 					+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(crc), 2) + " = "
 					+ Utility.getZeroFilledRightJustifiedString(Integer.toBinaryString(crc), 8) + "))");
-		}
+		
 		return crc;
 	}
 
@@ -497,7 +501,7 @@ public class Protocol implements ProtocolInterface {
 		try {
 			string = ow.writeValueAsString(this);
 		} catch (IOException ex) {
-			logger.error("IOException " + ex.getMessage());
+			logger.severe("IOException " + ex.getMessage());
 		}
 		return string;
 	}
