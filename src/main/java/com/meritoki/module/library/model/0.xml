@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Control</comment>
+<entry key="idSet">0</entry>
+<entry key="inputDelay">2.0</entry>
+<entry key="connectionDelay">5</entry>
+<entry key="acknowledgeDelay">5</entry>
+<entry key="connection">socket</entry>
+<entry key="hostAddress">localhost</entry>
+<entry key="port">8001</entry>
+<entry key="timeout">5</entry>
+<entry key="byteArrayLength">4096</entry>
+<entry key="tryMax">3</entry>
+<entry key="minInputDelay">5.0</entry>
+<entry key="maxInputDelay">10.0</entry>
+</properties>

@@ -1,5 +1,25 @@
-# Module
-Module is a library for running threads that are persisted by an application to perform specified functions.
+# Module Library
 
-## Use
-The Module object must be extended by a Class. Then the class must overwrite the run() method at a minimum.
+## Implementation
+
+### Guide
+
+#### Requirements
+
+##### Source
+1. Apache Maven
+2. Git
+
+#### Package
+
+##### Source
+
+###### Clone
+`$ git clone https://github.com/meritoki/module-library.git`
+
+###### Build
+
+`$ cd module-library`
+
+`$ mvn install`
+

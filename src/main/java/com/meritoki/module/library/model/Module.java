@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.meritoki.module.library.model;
 
 import java.net.URL;
@@ -13,14 +28,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
+import java.util.logging.Logger;
 
 public class Module extends URLClassLoader implements ModuleInterface {
-	public static Logger logger = LogManager.getLogger(Module.class);
+	protected Logger logger = Logger.getLogger(Module.class.getName());
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new ConcurrentHashMap<>());
@@ -47,48 +58,28 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public Module() {
 		super(new URL[0], Module.class.getClassLoader());
 		setID(0);
-//		if (logger == null) {
-//			logger = LogManager.getLogger(Module.class);
-//			Configurator.setRootLevel(Level.INFO);
-//		}
 	}
 
 	public Module(int id) {
 		super(new URL[0], Module.class.getClassLoader());
 		setID(id);
-//		if (logger == null) {
-//			logger = LogManager.getLogger(Module.class);
-//			Configurator.setRootLevel(Level.INFO);
-//		}
 	}
 
 	public Module(URL[] urlArray) {
 		super(urlArray, Module.class.getClassLoader());
 		setID(0);
-//		if (logger == null) {
-//			logger = LogManager.getLogger(Module.class);
-//			Configurator.setRootLevel(Level.INFO);
-//		}
 	}
 
 	public Module(int id, Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(id);
 		setRoot(module);
-//		if (logger == null) {
-//			logger = LogManager.getLogger(Module.class);
-//			Configurator.setRootLevel(Level.INFO);
-//		}
 	}
 
 	public Module(Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(0);
 		setRoot(module);
-//		if (logger == null) {
-//			logger = LogManager.getLogger(Module.class);
-//			Configurator.setRootLevel(Level.INFO);
-//		}
 	}
 
 	private void setID(int id) {
@@ -99,9 +90,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public void start() {
 		if (this.start) {
 			this.start = false;
-//			if (logger.isDebugEnabled()) {
-//				logger.trace(this + ".start()");
-//			}
+			logger.info("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
@@ -109,32 +98,24 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void initialize() {
-//		if (logger.isDebugEnabled()) {
-//			logger.trace(this + ".initialize()");
-//		}
+		logger.finest(this + ".initialize()");
 	}
 
 	public void run() {
 		this.initialize();
-//		if (logger.isDebugEnabled()) {
-//			logger.trace(this + ".run()");
-//		}
+		logger.finest(this + ".run()");
 		this.countDownLatchCountDown();
 	}
 
 	public void stop() {
-		if (logger.isDebugEnabled()) {
-			logger.trace(this + ".stop()");
-		}
+		logger.finest(this + ".stop()");
 		this.run = false;
 	}
 
 	public void destroy() {
 		if (!this.destroy) {
 			stop();
-			if (logger.isDebugEnabled()) {
-				logger.trace(this + ".destroy()");
-			}
+			logger.info("destroy()");
 			this.destroy = true;
 			if ((this.thread != null) && (this.interrupt)) {
 				this.thread.interrupt();
@@ -147,25 +128,22 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void setCountDownLatch(CountDownLatch countDownLatch) {
-		if (logger.isDebugEnabled()) {
-			logger.debug(this + ".setCountDownLatch(" + countDownLatch.getCount() + ")");
-		}
+		logger.fine(this + ".setCountDownLatch(" + countDownLatch.getCount() + ")");
 		this.countDownLatch = countDownLatch;
 	}
 
 	public void countDownLatchCountDown() {
 		if (this.countDownLatch != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(this + ".countDownLatchCountDown() (this.countDownLatch.getCount() = "
-						+ this.countDownLatch.getCount() + ")");
-			}
+			logger.fine("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
+					+ ")");
+
 			this.countDownLatch.countDown();
-			if (logger.isDebugEnabled()) {
-				logger.debug(this + ".countDownLatchCountDown() (this.countDownLatch.getCount() = "
-						+ this.countDownLatch.getCount() + ")");
-			}
-		} else if (logger.isDebugEnabled()) {
-			logger.warn("countDownLatchCountDown() (this.countDownLatch == null)");
+
+			logger.fine("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
+					+ ")");
+
+		} else {
+			logger.warning("countDownLatchCountDown() (this.countDownLatch == null)");
 		}
 	}
 
@@ -190,7 +168,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
-		logger.debug("add("+object+")");
+		logger.fine("add(" + object + ")");
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
@@ -208,7 +186,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 				try {
 					object = this.objectList.remove(index);
 				} catch (NoSuchElementException e) {
-					System.err.println("remove(" + index + ") NoSuchElementException");
+					logger.warning("remove(" + index + ") NoSuchElementException");
 				}
 			}
 			this.objectList.notify();
@@ -267,11 +245,11 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		try {
 			clazz = loadClass(className);
 		} catch (NoClassDefFoundError e) {
-			System.err.println("getURLClass(" + className + ") NoClassDefFoundError");
+			logger.warning("getURLClass(" + className + ") NoClassDefFoundError");
 		} catch (ClassNotFoundException e) {
-			System.err.println("getURLClass(" + className + ") ClassNotFoundException");
+			logger.warning("getURLClass(" + className + ") ClassNotFoundException");
 		} catch (SecurityException e) {
-			System.err.println("getURLClass(" + className + ") SecurityException");
+			logger.warning("getURLClass(" + className + ") SecurityException");
 		}
 		return clazz;
 	}
@@ -297,7 +275,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		String stringPackage = getClass().getPackage().getName();
 		if (stringPackage != null) {
 			string = string.replaceFirst("^" + stringPackage + ".", "");
-			string = string.substring(0,string.indexOf('@'));
+			string = string.substring(0, string.indexOf('@'));
 		}
 		return string;
 	}
@@ -415,9 +393,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	protected double newDelay(double delay) {
-		if (logger.isDebugEnabled()) {
-			logger.trace("newDelay(" + delay + ")");
-		}
+		logger.finest("newDelay(" + delay + ")");
 		Date date = new Date();
 		double time = date.getTime();
 		double now = time / 1000.0D;
@@ -440,17 +416,18 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		this.delay = delay;
 	}
 
-	protected void sleep(double seconds) {
-		if (logger.isDebugEnabled()) {
-			logger.trace("sleep(" + seconds + ")");
-		}
-		if (seconds > 0.001D) {
-			long milliseconds = (long) (seconds * 1000.0);
+	protected void sleep(long milliseconds) {
+		logger.finest("sleep(" + milliseconds + ")");
+		if (milliseconds > 0) {
 			try {
 				Thread.sleep(milliseconds);
 			} catch (InterruptedException e) {
-				logger.error("sleep(" + seconds + ") InterruptedException");
+				logger.warning("sleep(" + milliseconds + ") InterruptedException");
 			}
 		}
+	}
+
+	public int getModuleMapSize() {
+		return this.moduleMap.size();
 	}
 }
