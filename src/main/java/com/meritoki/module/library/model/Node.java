@@ -1,19 +1,18 @@
 /*
-Copyright 2018 Josvaldor
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.meritoki.module.library.model;
 
 import java.io.File;
@@ -23,6 +22,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,9 +30,10 @@ import com.meritoki.library.controller.node.NodeController;
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
 
-public class Node extends State {
-	public static final int INPUT = 2;
-	protected double inputDelay;
+public class Node extends Machine {
+	
+	protected Logger logger = Logger.getLogger(Node.class.getName());
+	protected double inputDelay = 1.0;
 	protected Properties idProperties = null;
 	protected Set<Object> idPropertiesKeySet = new HashSet<>();
 	protected String configurationPropertiesPath = null;
@@ -65,11 +66,9 @@ public class Node extends State {
 		this.idProperties = idPropertiesLoadFromXML(this.id.intValue());
 		this.configurationProperties = configurationPropertiesLoadFromXML(this.idProperties);
 		this.idSet.addAll(Utility.stringToIntegerSet(getProperty("idSet"), ",", "-"));
-		this.inputDelay = Utility.stringToDouble(getProperty("@inputDelay"));
+		this.inputDelay = Utility.stringToDouble(getProperty("@inputDelay", String.valueOf(this.inputDelay)));
 		logger.info("initialize() this.idSet="+this.idSet);
 		logger.info("initialize() this.inputDelay="+this.inputDelay);
-		this.stateMap.put(INPUT, "INPUT");
-		this.setState(INPUT);
 	}
 
 	public void destroy() {
@@ -108,7 +107,7 @@ public class Node extends State {
 	}
 
 	@Override
-	protected void machine(int state, Object object) {
+	protected void machine(State state, Object object) {
 		switch (state) {
 		case INPUT: {
 			inputState(object);
@@ -124,8 +123,12 @@ public class Node extends State {
 			Data data = (Data) object;
 			object = data.getObject();
 			switch (data.getType()) {
-			case POLL:
+			case POLL: {
 				poll(data, true);
+			}
+			default: {
+				logger.warning("inputState("+object+") "+data.getType()+" Unsupported");
+			}
 			}
 		}
 	}

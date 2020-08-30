@@ -1,8 +1,24 @@
+/*
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.meritoki.module.library.model;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
@@ -10,15 +26,14 @@ import com.meritoki.module.library.model.protocol.Protocol;
 import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Network extends Node {
-
-	public static final int CONNECTION = 1;
+	
+	protected Logger logger = Logger.getLogger(Network.class.getName());
 	protected int tryMin = 0;
 	protected int tryMax = 0;
-	protected int timeout = -1;
-	protected double connectionDelay;
-	protected double acknowledgeDelay = 0.0D;
-	protected String connection = "";
-	protected boolean network = true;
+	protected int timeout = 5;
+	protected double connectionDelay = 1.0;
+	protected double acknowledgeDelay = 1.0;
+	protected String connection = null;
 	protected Input input = null;
 	protected Output output = null;
 	protected Delay delay = null;
@@ -40,22 +55,20 @@ public class Network extends Node {
 	@Override
 	public void initialize() {
 		super.initialize();
-		this.tryMax = Utility.stringToInteger(getProperty("@tryMax"));
-		this.timeout = Utility.stringToInteger(getProperty("@timeout"));
-		this.connection = getProperty("@connection", null);
-		this.acknowledgeDelay = Utility.stringToDouble(getProperty("acknowledgeDelay"));
-		this.connectionDelay = Utility.stringToDouble(getProperty("@connectionDelay"));
+		this.tryMax = Utility.stringToInteger(getProperty("@tryMax", String.valueOf(this.tryMax)));
+		this.timeout = Utility.stringToInteger(getProperty("@timeout", String.valueOf(this.timeout)));
+		this.connection = getProperty("@connection");
+		this.acknowledgeDelay = Utility.stringToDouble(getProperty("acknowledgeDelay",String.valueOf(this.acknowledgeDelay)));
+		this.connectionDelay = Utility.stringToDouble(getProperty("@connectionDelay",String.valueOf(this.connectionDelay)));
 		logger.info("initialize() this.tryMax=" + this.tryMax);
 		logger.info("initialize() this.timeout=" + this.timeout);
 		logger.info("initialize() this.connection=" + this.connection);
 		logger.info("initialize() this.acknowledgeDelay=" + this.acknowledgeDelay);
 		logger.info("initialize() this.connectionDelay=" + this.connectionDelay);
-		this.stateMap.put(CONNECTION, "CONNECTION");
-		this.setState(CONNECTION);
 	}
 
 	@Override
-	protected void machine(int state, Object object) {
+	protected void machine(State state, Object object) {
 		switch (state) {
 		case CONNECTION: {
 			connectionState(object);
@@ -88,7 +101,7 @@ public class Network extends Node {
 					this.protocol = new Protocol();
 					poll(null, true);
 					setDelay(newDelay(this.inputDelay));
-					setState(INPUT);
+					setState(State.INPUT);
 				}
 			} else {
 				this.destroy();
@@ -98,27 +111,34 @@ public class Network extends Node {
 
 	@Override
 	protected void inputState(Object object) {
-		if (input()) {
+		if (io()) {
 			if ((object instanceof Data)) {
 				Data data = (Data) object;
 				object = data.getObject();
 				switch (data.getType()) {
-				case OUTPUT:
+				case OUTPUT: {
 					output(object);
 					break;
-				case INPUT:
+				}
+				case INPUT: {
 					input(object);
 					break;
-				case ACKNOWLEDGE:
+				}
+				case ACKNOWLEDGE: {
 					acknowledge(object);
 					break;
-				case POLL:
+				}
+				case POLL: {
 					poll(data, true);
 					break;
 				}
+				default: {
+					logger.warning("intputState("+object+") "+data.getType()+" Unsupported");
+				}
+				}
 			}
 		} else {
-			setState(CONNECTION);
+			setState(State.DEFAULT);
 		}
 	}
 
@@ -132,7 +152,7 @@ public class Network extends Node {
 							"output(" + object + ") (protocol.getMessageOffset() < this.protocol.getMessageOffset())");
 				} else if (protocol.getTryCount() > this.tryMax) {
 					logger.warning("output(" + object + ") (protocol.getTryCount() > this.tryMax)");
-					setState(DEFAULT);
+					setState(State.CONNECTION);
 				} else {
 					this.output.add(
 							new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT, 0.0D, protocol, null));
@@ -155,18 +175,30 @@ public class Network extends Node {
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
 			switch (protocol.getType()) {
-			case ADVERTISEMENT:
+			case ADVERTISEMENT: {
 				protocolSetMessageAcknowledged(object);
 				break;
-			case MESSAGE:
+			}
+			case MESSAGE: {
 				if (protocolSetMessageAcknowledged(object)) {
 					delayAcknowledge(object);
 				}
 				outputProtocolAdvertisement();
 				break;
-			case DISCONNECT:
+			}
+			case DISCONNECT: {
 				logger.info("input(" + object + ") Protocol.DISCONNECT");
-				setState(DEFAULT);
+				this.input.destroy();
+				this.output.destroy();
+				this.delay.destroy();
+				this.input = null;
+				this.output = null;
+				this.delay = null;
+				setState(State.CONNECTION);
+				break;
+			}
+			default:
+				break;
 			}
 		}
 	}
@@ -229,7 +261,7 @@ public class Network extends Node {
 		this.output.add(new Data(this.id.intValue(), this.id.intValue(), DataType.OUTPUT, 0.0D, protocol, null));
 	}
 
-	protected boolean getTry() {
+	public boolean getTry() {
 		boolean flag = true;
 		if (this.tryMax > 0) {
 			if (this.tryMin < this.tryMax) {
@@ -243,10 +275,10 @@ public class Network extends Node {
 		return flag;
 	}
 
-	protected boolean input() {
+	protected boolean io() {
 		boolean input = true;
 		if (this.moduleMap.size() < this.moduleMapSize) {
-			logger.warning("input() (this.moduleMap.size()<this.moduleMapSize)");
+			logger.warning("io() (this.moduleMap.size()<this.moduleMapSize)");
 			input = false;
 		}
 		return input;

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.meritoki.module.library.model;
 
 import java.net.URL;
@@ -401,14 +416,13 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		this.delay = delay;
 	}
 
-	protected void sleep(double seconds) {
-		logger.finest("sleep(" + seconds + ")");
-		if (seconds > 0.001D) {
-			long milliseconds = (long) (seconds * 1000.0);
+	protected void sleep(long milliseconds) {
+		logger.finest("sleep(" + milliseconds + ")");
+		if (milliseconds > 0) {
 			try {
 				Thread.sleep(milliseconds);
 			} catch (InterruptedException e) {
-				logger.warning("sleep(" + seconds + ") InterruptedException");
+				logger.warning("sleep(" + milliseconds + ") InterruptedException");
 			}
 		}
 	}

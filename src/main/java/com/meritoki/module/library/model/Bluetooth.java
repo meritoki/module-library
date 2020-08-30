@@ -1,9 +1,25 @@
+/*
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.meritoki.module.library.model;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
@@ -15,10 +31,14 @@ import javax.microedition.io.StreamConnectionNotifier;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class Bluetooth extends Network {
+import com.meritoki.module.library.model.protocol.Protocol;
 
+public class Bluetooth extends Network {
+	protected Logger logger = Logger.getLogger(Bluetooth.class.getName());
 	private String deviceUUID;
 	private String serviceName;
+	protected StreamConnection streamConnection;
+	private StreamConnectionNotifier streamConnectionNotifier;
 
 	public static void main(String[] args) {
 		Bluetooth bluetooth = new Bluetooth(0);
@@ -61,10 +81,10 @@ public class Bluetooth extends Network {
 					String url = "btspp://localhost:" + new UUID(deviceUUID, false)
 							+ ";authenticate=false;encrypt=false;name="+this.serviceName;
 					System.out.println(url);
-					StreamConnectionNotifier streamConnectionNotifier = (StreamConnectionNotifier) Connector.open(url);
-					StreamConnection streamConnection = streamConnectionNotifier.acceptAndOpen(); // Wait until client
+					this.streamConnectionNotifier = (StreamConnectionNotifier) Connector.open(url);
+					this.streamConnection = this.streamConnectionNotifier.acceptAndOpen(); // Wait until client
 																									// connects
-					flag = connection(streamConnection);
+					flag = connection(this.streamConnection);
 				} catch (BluetoothStateException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -108,5 +128,42 @@ public class Bluetooth extends Network {
 			e.printStackTrace();
 		}
 		return outputStream;
+	}
+	
+    @Override
+	protected void input(Object object) {
+		if ((object instanceof Protocol)) {
+			Protocol protocol = (Protocol) object;
+			switch (protocol.getType()) {
+			case ADVERTISEMENT: {
+				protocolSetMessageAcknowledged(object);
+				break;
+			}
+			case MESSAGE: {
+				if (protocolSetMessageAcknowledged(object)) {
+					delayAcknowledge(object);
+				}
+				outputProtocolAdvertisement();
+				break;
+			}
+			case DISCONNECT:{
+				logger.info("input(" + object + ") Protocol.DISCONNECT");
+				try {
+					this.streamConnection.close();
+					this.streamConnectionNotifier.close();
+				} catch (IOException e) {
+					logger.warning("IOException "+e.getMessage());
+				}
+				this.input.destroy();
+				this.output.destroy();
+				this.delay.destroy();
+				setState(State.CONNECTION);
+				break;
+			}
+			default: {
+				break;
+			}
+			}
+		}
 	}
 }

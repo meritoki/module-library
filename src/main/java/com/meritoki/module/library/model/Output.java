@@ -1,19 +1,18 @@
 /*
-Copyright 2018 Josvaldor
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.meritoki.module.library.model;
 
 import java.io.IOException;
@@ -33,6 +32,7 @@ public class Output extends Node {
 	@Override
 	public void initialize() {
 		super.initialize();
+		this.setState(State.INPUT);
 	}
 
 	@Override
@@ -40,22 +40,6 @@ public class Output extends Node {
 		if (!this.destroy) {
 			super.destroy();
 			outputStreamClose(this.outputStream);
-		}
-	}
-
-	public void output(Object object) {
-		logger.info("output("+object+")");
-		if ((object instanceof Protocol)) {
-			Protocol protocol = (Protocol) object;
-			byte[] byteArray = protocol.getByteArray();
-			try {
-				this.outputStream.write(byteArray);
-				this.outputStream.flush();
-				logger.info("output("+object+") written");
-			} catch (IOException e) {
-				logger.severe("output(" + object + ") IOException");
-				setState(0);
-			}
 		}
 	}
 
@@ -75,7 +59,22 @@ public class Output extends Node {
 			}
 		}
 	}
-	
+
+	public void output(Object object) {
+		if ((object instanceof Protocol)) {
+			Protocol protocol = (Protocol) object;
+			byte[] byteArray = protocol.getByteArray();
+			try {
+				this.outputStream.write(byteArray);
+				this.outputStream.flush();
+				logger.info("output("+object+") written");
+			} catch (IOException e) {
+				logger.severe("output(" + object + ") IOException");
+				this.destroy();
+			}
+		}
+	}
+
 	protected void outputStreamClose(OutputStream outputStream) {
 
 		logger.finest(this + ".outputStreamClose(" + outputStream + ")");

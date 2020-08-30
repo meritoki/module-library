@@ -1,19 +1,18 @@
 /*
-Copyright 2018 Josvaldor
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.meritoki.module.library.model;
 
 import java.io.IOException;
@@ -44,6 +43,7 @@ public class Input extends Node {
 		logger.info("initialize() this.minInputDelay="+this.minInputDelay);
 		logger.info("initialize() this.maxInputDelay="+this.maxInputDelay);
 		logger.info("initialize() this.byteArrayLength="+this.byteArrayLength);
+		this.setState(State.INPUT);
 	}
 
 	@Override
@@ -66,34 +66,23 @@ public class Input extends Node {
 				Protocol protocol = new Protocol();
 				protocol.deserialize(this.byteArray);
 				switch (protocol.getState()) {
-				case GOOD:
-					logger.info("input(...) Protocol.GOOD protocol.data="+protocol.data);
+				case GOOD: {
 					inputData(protocol);
 					break;
-				case BAD:
+				}
+				case BAD: {
 					protocol = new Protocol();
+					break;
+				}
+				default: {
+					break;
+				}
 				}
 			}
 		} catch (IOException e) {
 			logger.severe("input(object) IOException");
-			setState(0);
+			this.destroy();
 		}
-//		if (delayExpired()) {
-//			switch (this.state) {
-//			case INPUT:
-//				if (this.poll) {
-//					this.poll = false;
-//					inputData(Boolean.valueOf(this.poll));
-//					setDelay(newDelay(this.waitForInputMaxDelay));
-//					logger.warning("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
-//							+ ")))");
-//				} else {
-//					logger.warning("input() this.delayExpired()");
-//					setState(0);
-//				}
-//				break;
-//			}
-//		}
 	}
 
 	protected void inputData(Object object) {
@@ -116,3 +105,20 @@ public class Input extends Node {
 		}
 	}
 }
+
+//if (delayExpired()) {
+//switch (this.state) {
+//case INPUT:
+//	if (this.poll) {
+//		this.poll = false;
+//		inputData(Boolean.valueOf(this.poll));
+//		setDelay(newDelay(this.waitForInputMaxDelay));
+//		logger.warning("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
+//				+ ")))");
+//	} else {
+//		logger.warning("input() this.delayExpired()");
+//		setState(0);
+//	}
+//	break;
+//}
+//}

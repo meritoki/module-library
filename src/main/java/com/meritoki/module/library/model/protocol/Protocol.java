@@ -1,34 +1,28 @@
 /*
-Copyright 2018 Josvaldor
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.meritoki.module.library.model.protocol;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.meritoki.module.library.model.Module;
 import com.meritoki.module.library.model.Utility;
 
 public class Protocol {
@@ -67,6 +61,7 @@ public class Protocol {
 	protected int acknowledge = 0;
 	@JsonProperty
 	public String data;
+	@JsonProperty
 	protected int crc;
 	@JsonProperty
 	protected int tryCount = 0;
@@ -205,7 +200,6 @@ public class Protocol {
 				for (i = 0; i < dataLength; i++) {
 					if (index + i < byteArrayLength)
 						this.dataIntArray[i] = Utility.byteToInteger(byteArray[index + i]);
-					this.data += (char) this.dataIntArray[i];
 				}
 				intArray = Utility.appendIntArrays(intArray, this.dataIntArray);
 				index += dataLength;
@@ -225,11 +219,17 @@ public class Protocol {
 				} else {
 					this.state = ProtocolState.BAD;
 				}
-				flag = false;
 				continue;
+			case GOOD: 
+				for(int d: this.dataIntArray) {
+					this.data += (char) d;
+				}
+				flag = false;
+				break;
+			case BAD:
+				flag = false;
+				break;
 			}
-			flag = false;
-			this.state = ProtocolState.BAD;
 		}
 		if (index <= byteArrayLength) {
 			byteArray = Arrays.copyOfRange(byteArray, index, byteArrayLength);
@@ -271,9 +271,6 @@ public class Protocol {
 		return this.tryCount;
 	}
 
-//	public int getDataLength() {
-//		return this.dataLength;
-//	}
 	@JsonIgnore
 	public ProtocolState getState() {
 		return this.state;
@@ -293,14 +290,7 @@ public class Protocol {
 
 		return this.index;
 	}
-//
-//	public byte[] getDataByteArray() {
-//		return this.dataByteArray;
-//	}
-
-//	public void setObject(Object object) {
-//		this.object = object;
-//	}
+	
 	@JsonIgnore
 	public void setTryCount(int tryCount) {
 		this.tryCount = tryCount;
@@ -414,20 +404,12 @@ public class Protocol {
 	private int getType(ProtocolType protocolType) {
 		int type = 0;
 		switch (protocolType) {
-		case UNUSED: {
-			type = 1;
-			break;
-		}
 		case ADVERTISEMENT: {
 			type = 2;
 			break;
 		}
 		case MESSAGE: {
 			type = 3;
-			break;
-		}
-		case CONNECT: {
-			type = 4;
 			break;
 		}
 		case DISCONNECT: {
@@ -443,22 +425,14 @@ public class Protocol {
 	}
 	@JsonIgnore
 	private ProtocolType getProtocolType(int type) {
-		ProtocolType protocolType = ProtocolType.UNUSED;
+		ProtocolType protocolType = null;
 		switch (type) {
-		case 1: {
-			protocolType = ProtocolType.UNUSED;
-			break;
-		}
 		case 2: {
 			protocolType = ProtocolType.ADVERTISEMENT;
 			break;
 		}
 		case 3: {
 			protocolType = ProtocolType.MESSAGE;
-			break;
-		}
-		case 4: {
-			protocolType = ProtocolType.CONNECT;
 			break;
 		}
 		case 5: {

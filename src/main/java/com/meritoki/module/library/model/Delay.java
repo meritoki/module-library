@@ -1,19 +1,18 @@
 /*
-Copyright 2018 Josvaldor
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ * Copyright 2020 Joaquin Osvaldo Rodriguez
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 package com.meritoki.module.library.model;
 
 import java.util.ArrayList;
@@ -35,9 +34,23 @@ public class Delay extends Node {
 
 	public void initialize() {
 		super.initialize();
-		this.objectList = new ArrayList();
+		this.objectList = new ArrayList<>();
 		this.delay = this.delayMax;
 		this.delayMax = Utility.stringToDouble(this.idProperties.getProperty("delayMax"));
+		this.setState(State.INPUT);
+	}
+
+	protected void inputState(Object object) {
+		while ((0.0D >= this.delay) && (this.run)) {
+			this.delay = send();
+		}
+		if ((object instanceof Data)) {
+			Data container;
+			if ((container = (Data) object) != null) {
+				objectListAdd(container);
+			}
+		}
+		this.delay = getDelayMin();
 	}
 
 	protected double send() {
@@ -96,19 +109,6 @@ public class Delay extends Node {
 
 	protected void objectListAdd(Object object) {
 		this.objectList.add(object);
-	}
-
-	protected void inputState(Object object) {
-		while ((0.0D >= this.delay) && (this.run)) {
-			this.delay = send();
-		}
-		if ((object instanceof Data)) {
-			Data container;
-			if ((container = (Data) object) != null) {
-				objectListAdd(container);
-			}
-		}
-		this.delay = getDelayMin();
 	}
 
 	protected void inputData(Object object) {
