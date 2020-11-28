@@ -20,8 +20,10 @@ import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
+import com.meritoki.library.controller.json.JsonController;
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
+import com.meritoki.module.library.model.io.Response;
 import com.meritoki.module.library.model.protocol.Protocol;
 import com.meritoki.module.library.model.protocol.ProtocolType;
 
@@ -33,6 +35,7 @@ public class Network extends Node {
 	protected int timeout = 5;
 	protected double connectionDelay = 1.0;
 	protected double acknowledgeDelay = 1.0;
+	protected double aliveDelay = 10.0;
 	protected String connection = null;
 	protected Input input = null;
 	protected Output output = null;
@@ -60,6 +63,7 @@ public class Network extends Node {
 		this.connection = getProperty("@connection");
 		this.acknowledgeDelay = Utility.stringToDouble(getProperty("acknowledgeDelay",String.valueOf(this.acknowledgeDelay)));
 		this.connectionDelay = Utility.stringToDouble(getProperty("@connectionDelay",String.valueOf(this.connectionDelay)));
+		this.aliveDelay = Utility.stringToDouble(getProperty("@aliveDelay",String.valueOf(this.aliveDelay)));
 		logger.info("initialize() this.tryMax=" + this.tryMax);
 		logger.info("initialize() this.timeout=" + this.timeout);
 		logger.info("initialize() this.connection=" + this.connection);
@@ -104,6 +108,7 @@ public class Network extends Node {
 					setState(State.INPUT);
 				}
 			} else {
+				setState(State.DEFAULT);
 				this.destroy();
 			}
 		}
@@ -137,13 +142,24 @@ public class Network extends Node {
 				}
 				}
 			}
+			if(aliveExpired()) {
+				setAlive(newAlive(this.aliveDelay));
+				Response response = new Response();
+				response.uuid = null;
+				response.data = "true";
+				Protocol protocol = new Protocol();
+				protocol.serialize(ProtocolType.MESSAGE, this.protocol.getMessageOffset(),
+						this.protocol.getMessageAcknowledged(), JsonController.getJson(response));
+				this.output(protocol);
+			}
 		} else {
 			setState(State.DEFAULT);
+			this.destroy();
 		}
 	}
 
 	protected void output(Object object) {
-		logger.info("output(" + object + ")");
+		logger.fine("output(" + object + ")");
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
 			if (this.delay != null) {

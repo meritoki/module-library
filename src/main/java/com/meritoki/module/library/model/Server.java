@@ -32,6 +32,10 @@ public class Server extends Web {
 		super(id);
 	}
 	
+	public void setPort(int port) {
+		this.port = port;
+	}
+	
 	@Override
 	public void initialize() {
 		super.initialize();

@@ -45,6 +45,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected volatile boolean protect = false;
 	protected double now = 0.0D;
 	protected double delay = 0.0D;
+	protected double alive = 0.0D;
 	public boolean interrupt = true;
 	protected CountDownLatch countDownLatch = null;
 
@@ -290,6 +291,24 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		return flag;
 	}
 
+	protected void setDelay(double delay) {
+		this.delay = delay;
+	}
+	
+	protected boolean aliveExpired() {
+		boolean flag = now() > this.alive;
+		return flag;
+	}
+
+	protected boolean aliveExpired(double delay) {
+		boolean flag = now() > delay;
+		return flag;
+	}
+
+	protected void setAlive(double delay) {
+		this.alive = delay;
+	}
+
 	protected void moduleMapAdd(Map<String, Module> moduleMap, Object object) {
 		if ((moduleMap != null) && (object != null)) {
 			Set<String> moduleHashMapKeySet = moduleMap.keySet();
@@ -399,6 +418,14 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		double now = time / 1000.0D;
 		return now + delay;
 	}
+	
+	protected double newAlive(double delay) {
+		logger.finest("newAlive(" + delay + ")");
+		Date date = new Date();
+		double time = date.getTime();
+		double now = time / 1000.0D;
+		return now + delay;
+	}
 
 	protected double now() {
 		Date nowDate = new Date(System.currentTimeMillis());
@@ -410,10 +437,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected double newDate(Date date) {
 		double dateDouble = date.getTime();
 		return dateDouble / 1000.0D;
-	}
-
-	protected void setDelay(double delay) {
-		this.delay = delay;
 	}
 
 	protected void sleep(long milliseconds) {

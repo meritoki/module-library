@@ -83,7 +83,7 @@ public class Node extends Machine {
 
 	@Override
 	public void add(Object object) {
-		logger.info("add("+object+")");
+		logger.fine("add("+object+")");
 		if (this.filter) {
 			if ((object instanceof Data)) {
 				Data data = (Data) object;
