@@ -40,9 +40,9 @@ public class Input extends Node {
 		this.minInputDelay = Utility.stringToDouble(getProperty("@minInputDelay"));
 		this.maxInputDelay = Utility.stringToDouble(getProperty("@maxInputDelay"));
 		this.byteArrayLength = Utility.stringToInteger(getProperty("@byteArrayLength"));
-		logger.info("initialize() this.minInputDelay="+this.minInputDelay);
-		logger.info("initialize() this.maxInputDelay="+this.maxInputDelay);
-		logger.info("initialize() this.byteArrayLength="+this.byteArrayLength);
+		logger.fine("initialize() this.minInputDelay="+this.minInputDelay);
+		logger.fine("initialize() this.maxInputDelay="+this.maxInputDelay);
+		logger.fine("initialize() this.byteArrayLength="+this.byteArrayLength);
 		this.setState(State.INPUT);
 	}
 

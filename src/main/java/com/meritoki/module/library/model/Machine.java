@@ -47,7 +47,7 @@ public class Machine extends Module {
 	@Override
 	public void initialize() {
 		super.initialize();
-		logger.info("initialize() this.defaultDelay="+this.defaultDelay);
+		logger.fine("initialize() this.defaultDelay="+this.defaultDelay);
 	}
 
 	public void run() {

@@ -498,7 +498,7 @@ public class Web extends Network {
 	}
 
 	protected void serverSocketSetSoTimeout(ServerSocket serverSocket, int timeout) {
-		logger.info("serverSocketSetSoTimeout(" + serverSocket + ", " + timeout + ")");
+		logger.fine("serverSocketSetSoTimeout(" + serverSocket + ", " + timeout + ")");
 		try {
 			serverSocket.setSoTimeout(timeout);
 		} catch (SocketException e) {

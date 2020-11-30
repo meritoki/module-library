@@ -67,8 +67,8 @@ public class Node extends Machine {
 		this.configurationProperties = configurationPropertiesLoadFromXML(this.idProperties);
 		this.idSet.addAll(Utility.stringToIntegerSet(getProperty("idSet"), ",", "-"));
 		this.inputDelay = Utility.stringToDouble(getProperty("@inputDelay", String.valueOf(this.inputDelay)));
-		logger.info("initialize() this.idSet="+this.idSet);
-		logger.info("initialize() this.inputDelay="+this.inputDelay);
+		logger.fine("initialize() this.idSet="+this.idSet);
+		logger.fine("initialize() this.inputDelay="+this.inputDelay);
 	}
 
 	public void destroy() {

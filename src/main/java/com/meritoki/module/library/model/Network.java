@@ -64,11 +64,11 @@ public class Network extends Node {
 		this.acknowledgeDelay = Utility.stringToDouble(getProperty("acknowledgeDelay",String.valueOf(this.acknowledgeDelay)));
 		this.connectionDelay = Utility.stringToDouble(getProperty("@connectionDelay",String.valueOf(this.connectionDelay)));
 		this.aliveDelay = Utility.stringToDouble(getProperty("@aliveDelay",String.valueOf(this.aliveDelay)));
-		logger.info("initialize() this.tryMax=" + this.tryMax);
-		logger.info("initialize() this.timeout=" + this.timeout);
-		logger.info("initialize() this.connection=" + this.connection);
-		logger.info("initialize() this.acknowledgeDelay=" + this.acknowledgeDelay);
-		logger.info("initialize() this.connectionDelay=" + this.connectionDelay);
+		logger.fine("initialize() this.tryMax=" + this.tryMax);
+		logger.fine("initialize() this.timeout=" + this.timeout);
+		logger.fine("initialize() this.connection=" + this.connection);
+		logger.fine("initialize() this.acknowledgeDelay=" + this.acknowledgeDelay);
+		logger.fine("initialize() this.connectionDelay=" + this.connectionDelay);
 	}
 
 	@Override
