@@ -77,8 +77,8 @@ public class Web extends Network {
 
 	public void initialize() {
 		super.initialize();
-		this.hostAddress = getProperty("#hostAddress");
-		this.port = Utility.stringToInteger(getProperty("#port"));
+		this.hostAddress = (this.hostAddress == null)?getProperty("#hostAddress"):this.hostAddress;
+		this.port = (this.port == -1)?Utility.stringToInteger(getProperty("#port")):this.port;
 		this.path = getProperty("#path");
 		this.httpURL = newHTTPURL(this.hostAddress, this.port, this.path);
 		this.javaxNETSSLKeyStorePath = getProperty("@javaxNETSSLKeyStorePath");

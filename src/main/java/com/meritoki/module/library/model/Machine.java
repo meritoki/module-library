@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class Machine extends Module {
 	
 	protected Logger logger = Logger.getLogger(Machine.class.getName());
-	protected State state = null;
+	protected State state = State.DEFAULT;
 	protected State previousState = null;
 	protected double defaultDelay = 1.0;
 	protected long sleepDelay = 100;
@@ -47,7 +47,7 @@ public class Machine extends Module {
 	@Override
 	public void initialize() {
 		super.initialize();
-		logger.info("initialize() this.defaultDelay="+this.defaultDelay);
+		logger.fine("initialize() this.defaultDelay="+this.defaultDelay);
 	}
 
 	public void run() {
@@ -88,7 +88,7 @@ public class Machine extends Module {
 		return object;
 	}
 
-	protected void setState(State state) {
+	public void setState(State state) {
 		logger.info(this + ".setState(" + state + ")");
 		setState(state, false);
 	}

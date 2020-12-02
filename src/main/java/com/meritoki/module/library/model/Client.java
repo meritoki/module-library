@@ -46,6 +46,14 @@ public class Client extends Web {
 		this.setState(State.CONNECTION);
 	}
 	
+	public void setHostAddress(String hostAddress) {
+		this.hostAddress = hostAddress;
+	}
+	
+	public void setPort(int port) {
+		this.port = port;
+	}
+	
     @Override
     protected void output(Object object) {
         if(object instanceof String) {

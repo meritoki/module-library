@@ -1,4 +1,5 @@
 target/
 .settings/
+module/
 .classpath
 .project

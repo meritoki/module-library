@@ -15,30 +15,11 @@
  */
 package com.meritoki.module.library.model;
 
-import java.util.concurrent.CountDownLatch;
-
-public class Server extends Web {
-
-	
-	public static void main(String[] args) {
-		Server server = new Server(1);
-		CountDownLatch countDownLatch;
-		server.setCountDownLatch(countDownLatch = new CountDownLatch(1));
-		server.start();
-	}
-	
-	
-	public Server(int id) {
-		super(id);
-	}
-	
-	public void setPort(int port) {
-		this.port = port;
-	}
-	
-	@Override
-	public void initialize() {
-		super.initialize();
-		this.setState(State.CONNECTION);
-	}
+public enum State {
+	DEFAULT,
+	INPUT,
+	CONNECTION,
+	WAIT,
+	SEARCH,
+	SCAN
 }

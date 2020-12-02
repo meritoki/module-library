@@ -67,7 +67,7 @@ public class Output extends Node {
 			try {
 				this.outputStream.write(byteArray);
 				this.outputStream.flush();
-				logger.info("output("+object+") written");
+				logger.fine("output("+object+") written");
 			} catch (IOException e) {
 				logger.severe("output(" + object + ") IOException");
 				this.destroy();
