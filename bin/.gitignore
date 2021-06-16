@@ -1,5 +1,5 @@
 target/
 .settings/
-module/
 .classpath
 .project
+/src/
