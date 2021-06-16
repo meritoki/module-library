@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>com.meritoki.library</groupId>
 			<artifactId>controller</artifactId>
-			<version>0.3.202012</version>
+			<version>0.4.202106</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
