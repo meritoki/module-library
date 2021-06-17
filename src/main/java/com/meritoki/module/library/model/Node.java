@@ -166,6 +166,7 @@ public class Node extends Machine {
 		logger.info("idPropertiesLoadFromXML(" + id + ")");
 		Properties properties = NodeController.openPropertiesXML(getClass().getResourceAsStream(id + ".xml"));
 		if (properties == null) {
+			logger.warning("idPropertiesLoadFromXML(" + id + ") properties == null");
 			properties = new Properties();
 		} else {
 			this.idPropertiesKeySet = properties.keySet();
