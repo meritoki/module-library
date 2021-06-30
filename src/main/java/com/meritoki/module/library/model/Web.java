@@ -33,6 +33,9 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.meritoki.module.library.model.protocol.Protocol;
+import com.meritoki.module.library.model.protocol.ProtocolType;
+
 public class Web extends Network {
 
 	protected Socket socket = null;
@@ -169,6 +172,16 @@ public class Web extends Network {
 			sslServerSocketClose(this.sslServerSocket);
 		}
 	}
+	
+    @Override
+    protected void output(Object object) {
+        if(object instanceof String) {
+            String string = (String) object;
+            Protocol protocol = new Protocol();
+            protocol.serialize(ProtocolType.MESSAGE,this.protocol.getMessageOffset(),this.protocol.getMessageAcknowledged(),string);
+            super.output(protocol);
+        }
+    }
 
 	protected boolean connection() {
 		boolean connection = false;

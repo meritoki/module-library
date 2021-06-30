@@ -10,13 +10,16 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class Request {
 	@JsonProperty
+	public String uuid;
+	@JsonProperty
 	public Method method;
+	@JsonProperty
+	public String uri;
 	@JsonProperty
 	public String key;//key can do a lot of things when sent to server, such as tell server how to Parse the value
 	@JsonProperty
 	public String value;//value can hold a JSON object;
-	@JsonProperty
-	public String uuid;
+	
 	
     public Request() {
         this.uuid = UUID.randomUUID().toString();

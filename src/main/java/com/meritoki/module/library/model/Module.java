@@ -325,6 +325,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	protected void moduleMapStart(Map<String, Module> moduleMap) {
+//		logger.info("moduleMapStart(("+moduleMap+")");
 		Set<String> moduleMapKeySet = moduleMap.keySet();
 		Iterator<String> moduleHashMapIterator = moduleMapKeySet.iterator();
 		while (moduleHashMapIterator.hasNext()) {

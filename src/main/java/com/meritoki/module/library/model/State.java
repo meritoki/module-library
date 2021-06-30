@@ -21,5 +21,7 @@ public enum State {
 	CONNECTION,
 	WAIT,
 	SEARCH,
-	SCAN
+	SCAN,
+	BLOCK,
+	UNBLOCK
 }

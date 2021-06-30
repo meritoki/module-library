@@ -32,6 +32,7 @@ import javax.microedition.io.StreamConnectionNotifier;
 import org.apache.commons.lang3.StringUtils;
 
 import com.meritoki.module.library.model.protocol.Protocol;
+import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Bluetooth extends Network {
 	protected Logger logger = Logger.getLogger(Bluetooth.class.getName());
@@ -129,6 +130,16 @@ public class Bluetooth extends Network {
 		}
 		return outputStream;
 	}
+	
+    @Override
+    protected void output(Object object) {
+        if(object instanceof String) {
+            String string = (String) object;
+            Protocol protocol = new Protocol();
+            protocol.serialize(ProtocolType.MESSAGE,this.protocol.getMessageOffset(),this.protocol.getMessageAcknowledged(),string);
+            super.output(protocol);
+        }
+    }
 	
     @Override
 	protected void input(Object object) {

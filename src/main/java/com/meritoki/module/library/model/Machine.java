@@ -61,11 +61,15 @@ public class Machine extends Module {
 	public State getState() {
 		return this.state;
 	}
+	
+	public void function() {
+		
+	}
 
 	protected void machine() {
 		Object object = remove(0);
 		machine(this.state, object);
-		
+		function();
 	}
 
 	protected void machine(State state, Object object) {
