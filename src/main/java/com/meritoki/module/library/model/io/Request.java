@@ -1,6 +1,7 @@
 package com.meritoki.module.library.model.io;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,10 +17,7 @@ public class Request {
 	@JsonProperty
 	public String uri;
 	@JsonProperty
-	public String key;//key can do a lot of things when sent to server, such as tell server how to Parse the value
-	@JsonProperty
-	public String value;//value can hold a JSON object;
-	
+	public Map<String,String> map;
 	
     public Request() {
         this.uuid = UUID.randomUUID().toString();

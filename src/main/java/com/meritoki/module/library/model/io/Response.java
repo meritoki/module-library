@@ -1,6 +1,8 @@
 package com.meritoki.module.library.model.io;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +14,7 @@ public class Response {
 	@JsonProperty
 	public String uuid;
 	@JsonProperty
-	public String data;
+	public Map<String,String> map = new HashMap<>();
 	
     @JsonIgnore
     @Override

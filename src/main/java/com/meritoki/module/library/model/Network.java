@@ -146,7 +146,7 @@ public class Network extends Node {
 				setAlive(newAlive(this.aliveDelay));
 				Response response = new Response();
 				response.uuid = null;
-				response.data = "true";
+				response.map.put("alive","true");
 				Protocol protocol = new Protocol();
 				protocol.serialize(ProtocolType.MESSAGE, this.protocol.getMessageOffset(),
 						this.protocol.getMessageAcknowledged(), JsonController.getJson(response));
