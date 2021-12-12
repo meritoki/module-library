@@ -120,8 +120,11 @@ public class Network extends Node {
 			if ((object instanceof Data)) {
 				Data data = (Data) object;
 				object = data.getObject();
+				logger.info("inputState(...) data.getType()="+data.getType());
+				logger.info("inputState(...) data.getObject()="+data.getObject());
 				switch (data.getType()) {
 				case OUTPUT: {
+					
 					output(object);
 					break;
 				}
@@ -159,7 +162,7 @@ public class Network extends Node {
 	}
 
 	protected void output(Object object) {
-		logger.fine("output(" + object + ")");
+		logger.info("output(" + object + ")");
 		if ((object instanceof Protocol)) {
 			Protocol protocol = (Protocol) object;
 			if (this.delay != null) {

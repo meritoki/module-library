@@ -16,9 +16,11 @@
 package com.meritoki.module.library.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -26,12 +28,14 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.meritoki.library.controller.node.NodeController;
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
 
 public class Node extends Machine {
 	
+	public String name;
 	protected Logger logger = Logger.getLogger(Node.class.getName());
 	protected double inputDelay = 1.0;
 	protected Properties idProperties = null;
@@ -50,6 +54,16 @@ public class Node extends Machine {
 	}
 
 	public Node() {
+	}
+	
+	public Node(String name) {
+		super(name.hashCode());
+		this.name = name;
+	}
+	
+	public Node(String name, Module module) {
+		super(name.hashCode(),module);
+		this.name = name;
 	}
 
 	public Node(int id) {
@@ -105,6 +119,34 @@ public class Node extends Machine {
 
 	public Properties getConfigurationProperties() {
 		return this.configurationProperties;
+	}
+	
+//	@JsonIgnore
+//	public Node addChild(Node child) {
+//		child.setParent(this);
+//		this.children.add(child);
+//		return child;
+//	}
+//
+//	@JsonIgnore
+//	public void addChildren(List<Node> children) {
+//		children.forEach(each -> each.setParent(this));
+//		this.children.addAll(children);
+//	}
+
+
+
+	public Properties getIDProperties() {
+		return this.idProperties;
+	}
+	
+	@Override
+	public String toString() {
+		String string = super.toString();
+		if(this.name != null) {
+			string = this.name;
+		}
+		return string;
 	}
 
 	@Override
@@ -206,10 +248,6 @@ public class Node extends Machine {
 			}
 		}
 		return configurationProperties;
-	}
-
-	public Properties getIDProperties() {
-		return this.idProperties;
 	}
 
 	protected String getIDProperty(String key) {

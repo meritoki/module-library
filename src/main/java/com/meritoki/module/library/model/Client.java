@@ -29,10 +29,15 @@ public class Client extends Web {
 		CountDownLatch countDownLatch;
 		client.setCountDownLatch(countDownLatch = new CountDownLatch(1));
 		client.start();
-		while(client.getState() == State.CONNECTION) {
-//			System.out.println("Waiting...");
-		}		
-		System.out.println("SEND");
+		while(client.getState() != State.INPUT) {
+			System.out.println("Waiting...");
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		client.add(new Data(0,0,DataType.OUTPUT,0,"{Hello World}",null));
 	}
 	
@@ -53,14 +58,4 @@ public class Client extends Web {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
-    @Override
-    protected void output(Object object) {
-        if(object instanceof String) {
-            String string = (String) object;
-            Protocol protocol = new Protocol();
-            protocol.serialize(ProtocolType.MESSAGE,this.protocol.getMessageOffset(),this.protocol.getMessageAcknowledged(),string);
-            super.output(protocol);
-        }
-    }
 }

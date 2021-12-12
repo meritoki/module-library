@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Module extends URLClassLoader implements ModuleInterface {
 	protected Logger logger = Logger.getLogger(Module.class.getName());
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
@@ -75,12 +77,18 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(id);
 		setRoot(module);
+		if (this.root != null) {
+			this.root.moduleMapPut(this);
+		}
 	}
 
 	public Module(Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(0);
 		setRoot(module);
+		if (this.root != null) {
+			this.root.moduleMapPut(this);
+		}
 	}
 
 	private void setID(int id) {
@@ -88,9 +96,11 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		this.idSet.add(this.id);
 	}
 
+
 	public void start() {
 		if (this.start) {
 			this.start = false;
+			this.run = true;
 			logger.info("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
@@ -109,8 +119,14 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void stop() {
-		logger.finest(this + ".stop()");
+		logger.info(this + ".stop()");
 		this.run = false;
+		if ((this.thread != null)) {// && (this.interrupt)) {
+			this.thread.interrupt();
+			logger.info(this + ".stop() this.thread.isInterrupted()="+this.thread.isInterrupted());
+			logger.info(this + ".stop() this.thread.isInterrupted()="+this.thread.isInterrupted());
+		}
+		this.start = true;
 	}
 
 	public void destroy() {
@@ -118,9 +134,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 			stop();
 			logger.info("destroy()");
 			this.destroy = true;
-			if ((this.thread != null) && (this.interrupt)) {
-				this.thread.interrupt();
-			}
 			moduleMapDestroy(this.moduleMap);
 			if (this.root != null) {
 				this.root.moduleMapRemove(this);
@@ -169,7 +182,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
-		logger.fine("add(" + object + ")");
+		logger.info("add(" + object + ")");
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
@@ -216,7 +229,9 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void moduleMapPut(Object object) {
 		if ((object instanceof Module)) {
-			this.moduleMap.put(((Module) object).toString(), (Module) object);
+			Module module = (Module)object;
+			module.setRoot(this);
+			this.moduleMap.put(module.toString(), module);
 		}
 	}
 
@@ -236,9 +251,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void setRoot(Module root) {
 		this.root = root;
-		if (this.root != null) {
-			this.root.moduleMapPut(this);
-		}
 	}
 
 	public Class<?> getURLClass(String className) {
@@ -259,7 +271,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		return this.objectList;
 	}
 
-	public Module getRootModule() {
+	public Module getRoot() {
 		return this.root;
 	}
 
