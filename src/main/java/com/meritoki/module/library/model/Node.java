@@ -120,21 +120,6 @@ public class Node extends Machine {
 	public Properties getConfigurationProperties() {
 		return this.configurationProperties;
 	}
-	
-//	@JsonIgnore
-//	public Node addChild(Node child) {
-//		child.setParent(this);
-//		this.children.add(child);
-//		return child;
-//	}
-//
-//	@JsonIgnore
-//	public void addChildren(List<Node> children) {
-//		children.forEach(each -> each.setParent(this));
-//		this.children.addAll(children);
-//	}
-
-
 
 	public Properties getIDProperties() {
 		return this.idProperties;
@@ -206,10 +191,10 @@ public class Node extends Machine {
 	}
 
 	protected Properties idPropertiesLoadFromXML(int id) {
-		logger.info("idPropertiesLoadFromXML(" + id + ")");
+		logger.fine("idPropertiesLoadFromXML(" + id + ")");
 		Properties properties = NodeController.openPropertiesXML(getClass().getResourceAsStream(id + ".xml"));
 		if (properties == null) {
-			logger.warning("idPropertiesLoadFromXML(" + id + ") properties == null");
+//			logger.warning("idPropertiesLoadFromXML(" + id + ") properties == null");
 			properties = new Properties();
 		} else {
 			this.idPropertiesKeySet = properties.keySet();
@@ -355,3 +340,16 @@ public class Node extends Machine {
 		return fileURL;
 	}
 }
+
+//@JsonIgnore
+//public Node addChild(Node child) {
+//	child.setParent(this);
+//	this.children.add(child);
+//	return child;
+//}
+//
+//@JsonIgnore
+//public void addChildren(List<Node> children) {
+//	children.forEach(each -> each.setParent(this));
+//	this.children.addAll(children);
+//}

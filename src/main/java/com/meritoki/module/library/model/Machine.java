@@ -93,7 +93,7 @@ public class Machine extends Module {
 	}
 
 	public void setState(State state) {
-		logger.info(this + ".setState(" + state + ")");
+		logger.fine(this + ".setState(" + state + ")");
 		setState(state, false);
 	}
 

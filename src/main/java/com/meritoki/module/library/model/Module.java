@@ -101,7 +101,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		if (this.start) {
 			this.start = false;
 			this.run = true;
-			logger.info("start()");
+			logger.fine("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
@@ -156,9 +156,10 @@ public class Module extends URLClassLoader implements ModuleInterface {
 			logger.fine("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
 					+ ")");
 
-		} else {
-			logger.warning("countDownLatchCountDown() (this.countDownLatch == null)");
-		}
+		} 
+//		else {
+//			logger.warning("countDownLatchCountDown() (this.countDownLatch == null)");
+//		}
 	}
 
 	public boolean getStart() {
@@ -182,7 +183,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
-		logger.info("add(" + object + ")");
+//		logger.info("add(" + object + ")");
 		synchronized (this.objectList) {
 			if ((object instanceof List)) {
 				this.objectList.addAll((List) object);
@@ -273,6 +274,13 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public Module getRoot() {
 		return this.root;
+	}
+	
+	public Module getAbsoluteRoot() {
+		if(this.root == null) {
+			return this;
+		}
+		return this.root.getAbsoluteRoot();
 	}
 
 	public Map<String, Module> getModuleMap() {
