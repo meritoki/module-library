@@ -3,7 +3,7 @@ An implementation is the process of manifesting an instance of a system.
 ## Citation
 If one uses Module for data processing and publishes the results obtained, please cite Module in publications as follows:
 
-Rodriguez, J. O. (2019-2021). Module (Version 0.4.202106) [Software]. Meritoki.
+Rodriguez, J. O. (2019-2021). Module (Version 0.6.202008) [Software]. Meritoki.
 https://github.com/meritoki/module-library
 
 ## License
@@ -51,7 +51,7 @@ Add the following dependency to your pom.xml
 <dependency>
   <groupId>com.meritoki.library</groupId>
   <artifactId>module</artifactId>
-  <version>0.4.202106</version>
+  <version>0.6.202008</version>
 </dependency>
 
 ```
