@@ -1,6 +1,7 @@
 package com.meritoki.module.library.model.io;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class Request {
 	@JsonProperty
 	public String uri;
 	@JsonProperty
-	public Map<String,String> map;
+	public Map<String,String> map = new HashMap<>();
 	
     public Request() {
         this.uuid = UUID.randomUUID().toString();

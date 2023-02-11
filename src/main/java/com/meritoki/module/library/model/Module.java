@@ -26,17 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.LinkedHashMap;
 
 public class Module extends URLClassLoader implements ModuleInterface {
 	protected Logger logger = Logger.getLogger(Module.class.getName());
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
-	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new ConcurrentHashMap<>());
+	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new LinkedHashMap<>());
 	protected int moduleMapSize = 0;
 	public Thread thread = null;
 	public Module root = null;
