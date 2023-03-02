@@ -22,16 +22,18 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
-import java.util.LinkedHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Module extends URLClassLoader implements ModuleInterface {
-	protected Logger logger = Logger.getLogger(Module.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Module.class.getName());
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new LinkedHashMap<>());
@@ -99,7 +101,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		if (this.start) {
 			this.start = false;
 			this.run = true;
-			logger.fine("start()");
+			logger.debug("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
@@ -107,12 +109,12 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void initialize() {
-		logger.finest(this + ".initialize()");
+		logger.trace(this + ".initialize()");
 	}
 
 	public void run() {
 		this.initialize();
-		logger.finest(this + ".run()");
+		logger.trace(this + ".run()");
 		this.countDownLatchCountDown();
 	}
 
@@ -140,23 +142,23 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void setCountDownLatch(CountDownLatch countDownLatch) {
-		logger.fine(this + ".setCountDownLatch(" + countDownLatch.getCount() + ")");
+		logger.debug(this + ".setCountDownLatch(" + countDownLatch.getCount() + ")");
 		this.countDownLatch = countDownLatch;
 	}
 
 	public void countDownLatchCountDown() {
 		if (this.countDownLatch != null) {
-			logger.fine("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
+			logger.debug("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
 					+ ")");
 
 			this.countDownLatch.countDown();
 
-			logger.fine("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
+			logger.debug("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
 					+ ")");
 
 		} 
 //		else {
-//			logger.warning("countDownLatchCountDown() (this.countDownLatch == null)");
+//			logger.warn("countDownLatchCountDown() (this.countDownLatch == null)");
 //		}
 	}
 
@@ -199,7 +201,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 				try {
 					object = this.objectList.remove(index);
 				} catch (NoSuchElementException e) {
-					logger.warning("remove(" + index + ") NoSuchElementException");
+					logger.warn("remove(" + index + ") NoSuchElementException");
 				}
 			}
 			this.objectList.notify();
@@ -257,11 +259,11 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		try {
 			clazz = loadClass(className);
 		} catch (NoClassDefFoundError e) {
-			logger.warning("getURLClass(" + className + ") NoClassDefFoundError");
+			logger.warn("getURLClass(" + className + ") NoClassDefFoundError");
 		} catch (ClassNotFoundException e) {
-			logger.warning("getURLClass(" + className + ") ClassNotFoundException");
+			logger.warn("getURLClass(" + className + ") ClassNotFoundException");
 		} catch (SecurityException e) {
-			logger.warning("getURLClass(" + className + ") SecurityException");
+			logger.warn("getURLClass(" + className + ") SecurityException");
 		}
 		return clazz;
 	}
@@ -431,7 +433,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	protected double newDelay(double delay) {
-		logger.finest("newDelay(" + delay + ")");
+		logger.trace("newDelay(" + delay + ")");
 		Date date = new Date();
 		double time = date.getTime();
 		double now = time / 1000.0D;
@@ -439,7 +441,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 	
 	protected double newAlive(double delay) {
-		logger.finest("newAlive(" + delay + ")");
+		logger.trace("newAlive(" + delay + ")");
 		Date date = new Date();
 		double time = date.getTime();
 		double now = time / 1000.0D;
@@ -459,12 +461,12 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	protected void sleep(long milliseconds) {
-		logger.finest("sleep(" + milliseconds + ")");
+		logger.trace("sleep(" + milliseconds + ")");
 		if (milliseconds > 0) {
 			try {
 				Thread.sleep(milliseconds);
 			} catch (InterruptedException e) {
-				logger.warning("sleep(" + milliseconds + ") InterruptedException");
+				logger.warn("sleep(" + milliseconds + ") InterruptedException");
 			}
 		}
 	}

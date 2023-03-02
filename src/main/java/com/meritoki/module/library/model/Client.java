@@ -19,8 +19,6 @@ import java.util.concurrent.CountDownLatch;
 
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
-import com.meritoki.module.library.model.protocol.Protocol;
-import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Client extends Web {
 	

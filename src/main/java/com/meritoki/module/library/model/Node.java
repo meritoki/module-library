@@ -16,19 +16,17 @@
 package com.meritoki.module.library.model;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.meritoki.library.controller.node.NodeController;
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;
@@ -36,7 +34,7 @@ import com.meritoki.module.library.model.data.DataType;
 public class Node extends Machine {
 	
 	public String name;
-	protected Logger logger = Logger.getLogger(Node.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Node.class.getName());
 	protected double inputDelay = 1.0;
 	protected Properties idProperties = null;
 	protected Set<Object> idPropertiesKeySet = new HashSet<>();
@@ -82,8 +80,8 @@ public class Node extends Machine {
 		this.idSet.addAll(Utility.stringToIntegerSet(getProperty("idSet"), ",", "-"));
 		this.inputDelay = Utility.stringToDouble(getProperty("@inputDelay", String.valueOf(this.inputDelay)));
 		this.setState(State.valueOf(getProperty("@state","DEFAULT")));
-		logger.fine("initialize() this.idSet="+this.idSet);
-		logger.fine("initialize() this.inputDelay="+this.inputDelay);
+		logger.debug("initialize() this.idSet="+this.idSet);
+		logger.debug("initialize() this.inputDelay="+this.inputDelay);
 	}
 
 	public void destroy() {
@@ -98,17 +96,17 @@ public class Node extends Machine {
 
 	@Override
 	public void add(Object object) {
-		logger.fine("add("+object+")");
+		logger.debug("add("+object+")");
 		if (this.filter) {
 			if ((object instanceof Data)) {
 				Data data = (Data) object;
 				if (data.getDestinationID() == this.id) {
-					logger.fine("add(" + object + ") (data.getDestinationID() == this.id)");
+					logger.debug("add(" + object + ") (data.getDestinationID() == this.id)");
 					if (this.idSet.contains(data.getSourceID())) {
-						logger.fine("add(" + object + ") (this.idSet.contains(data.getSourceID()))");
+						logger.debug("add(" + object + ") (this.idSet.contains(data.getSourceID()))");
 						super.add(data);
 					} else {
-						logger.warning("add(" + object + ") !(this.idSet.contains(data.getSourceID()))");
+						logger.warn("add(" + object + ") !(this.idSet.contains(data.getSourceID()))");
 					}
 				}
 			}
@@ -155,7 +153,7 @@ public class Node extends Machine {
 				poll(data, true);
 			}
 			default: {
-				logger.warning("inputState("+object+") "+data.getType()+" Unsupported");
+				logger.warn("inputState("+object+") "+data.getType()+" Unsupported");
 			}
 			}
 		}
@@ -178,7 +176,7 @@ public class Node extends Machine {
 
 	protected void inputData(Object object) {
 		if (object != null) {
-			logger.finest("inputContainer(" + object + ")");
+			logger.trace("inputContainer(" + object + ")");
 			Iterator<Integer> idSetIterator = this.idSet.iterator();
 			Integer id = null;
 			while (idSetIterator.hasNext()) {
@@ -191,10 +189,10 @@ public class Node extends Machine {
 	}
 
 	protected Properties idPropertiesLoadFromXML(int id) {
-		logger.fine("idPropertiesLoadFromXML(" + id + ")");
+		logger.debug("idPropertiesLoadFromXML(" + id + ")");
 		Properties properties = NodeController.openPropertiesXML(getClass().getResourceAsStream(id + ".xml"));
 		if (properties == null) {
-//			logger.warning("idPropertiesLoadFromXML(" + id + ") properties == null");
+//			logger.warn("idPropertiesLoadFromXML(" + id + ") properties == null");
 			properties = new Properties();
 		} else {
 			this.idPropertiesKeySet = properties.keySet();
@@ -203,20 +201,20 @@ public class Node extends Machine {
 	}
 
 	protected Properties configurationPropertiesLoadFromXML(Properties properties) {
-		logger.fine("configurationPropertiesLoadFromXML(" + properties + ")");
+		logger.debug("configurationPropertiesLoadFromXML(" + properties + ")");
 		Properties configurationProperties = new Properties();
 		if (properties != null) {
 			this.configurationPropertiesPath = properties.getProperty("configurationPropertiesPath");
-			logger.finest("configurationPropertiesLoadFromXML(properties) (this.configurationPropertiesPath = "
+			logger.trace("configurationPropertiesLoadFromXML(properties) (this.configurationPropertiesPath = "
 					+ this.configurationPropertiesPath + ")");
 			if (StringUtils.isNotBlank(this.configurationPropertiesPath)) {
 				File configurationPropertiesFile = new File(this.configurationPropertiesPath);
 				if (!configurationPropertiesFile.exists()) {
-					logger.finest(
+					logger.trace(
 							"configurationPropertiesLoadFromXML(properties) (!configurationPropertiesFile.exists())");
 					NodeController.savePropertiesXML(configurationProperties, this.configurationPropertiesPath, "");
 				} else {
-					logger.finest(
+					logger.trace(
 							"configurationPropertiesLoadFromXML(properties) (configurationPropertiesFile.exists())");
 					configurationProperties = NodeController.openPropertiesXML(configurationPropertiesFile);
 					this.configurationPropertiesKeySet = configurationProperties.keySet();
@@ -279,13 +277,13 @@ public class Node extends Machine {
 					if ((this.configurationPropertiesKeySet != null)
 							&& (this.configurationPropertiesKeySet.contains(keyDelta))) {
 
-						logger.finest("getProperty(" + key + ", " + defaultValue
+						logger.trace("getProperty(" + key + ", " + defaultValue
 								+ ") (this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
 
 						property = getConfigurationProperty(keyDelta);
 					} else {
 
-						logger.finest("getProperty(" + key + ", " + defaultValue
+						logger.trace("getProperty(" + key + ", " + defaultValue
 								+ ") (!this.configurationPropertiesKeySet.contains(" + keyDelta + "))");
 
 						String value = getIDProperty(key);
@@ -298,7 +296,7 @@ public class Node extends Machine {
 		if (property == null) {
 			property = defaultValue;
 		}
-		logger.finest("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
+		logger.trace("getProperty(" + key + ", " + defaultValue + ") (" + key + ", " + property + ")");
 		return property;
 	}
 
@@ -311,7 +309,7 @@ public class Node extends Machine {
 	}
 
 	protected boolean setConfigurationProperty(Properties properties, String propertiesPath, String key, String value) {
-		logger.finest("setConfigurationProperty(properties, " + propertiesPath + ", " + key + ", " + value + ")");
+		logger.trace("setConfigurationProperty(properties, " + propertiesPath + ", " + key + ", " + value + ")");
 		String valueAlpha = properties.getProperty(key);
 		boolean flag = false;
 		String date = Utility.formatDate("GMT", "yyyyMMddHHmmss", new Date());

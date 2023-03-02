@@ -18,7 +18,9 @@ package com.meritoki.module.library.model;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.meritoki.library.controller.json.JsonController;
 import com.meritoki.module.library.model.data.Data;
@@ -29,7 +31,7 @@ import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Network extends Node {
 	
-	protected Logger logger = Logger.getLogger(Network.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Network.class.getName());
 	protected int tryMin = 0;
 	protected int tryMax = 0;
 	protected int timeout = 5;
@@ -64,11 +66,11 @@ public class Network extends Node {
 		this.acknowledgeDelay = Utility.stringToDouble(getProperty("acknowledgeDelay",String.valueOf(this.acknowledgeDelay)));
 		this.connectionDelay = Utility.stringToDouble(getProperty("@connectionDelay",String.valueOf(this.connectionDelay)));
 		this.aliveDelay = Utility.stringToDouble(getProperty("@aliveDelay",String.valueOf(this.aliveDelay)));
-		logger.fine("initialize() this.tryMax=" + this.tryMax);
-		logger.fine("initialize() this.timeout=" + this.timeout);
-		logger.fine("initialize() this.connection=" + this.connection);
-		logger.fine("initialize() this.acknowledgeDelay=" + this.acknowledgeDelay);
-		logger.fine("initialize() this.connectionDelay=" + this.connectionDelay);
+		logger.debug("initialize() this.tryMax=" + this.tryMax);
+		logger.debug("initialize() this.timeout=" + this.timeout);
+		logger.debug("initialize() this.connection=" + this.connection);
+		logger.debug("initialize() this.acknowledgeDelay=" + this.acknowledgeDelay);
+		logger.debug("initialize() this.connectionDelay=" + this.connectionDelay);
 	}
 
 	@Override
@@ -141,7 +143,7 @@ public class Network extends Node {
 					break;
 				}
 				default: {
-					logger.warning("intputState("+object+") "+data.getType()+" Unsupported");
+					logger.warn("intputState("+object+") "+data.getType()+" Unsupported");
 				}
 				}
 			}
@@ -167,10 +169,10 @@ public class Network extends Node {
 			Protocol protocol = (Protocol) object;
 			if (this.delay != null) {
 				if (protocol.getMessageOffset() < this.protocol.getMessageOffset()) {
-					logger.warning(
+					logger.warn(
 							"output(" + object + ") (protocol.getMessageOffset() < this.protocol.getMessageOffset())");
 				} else if (protocol.getTryCount() > this.tryMax) {
-					logger.warning("output(" + object + ") (protocol.getTryCount() > this.tryMax)");
+					logger.warn("output(" + object + ") (protocol.getTryCount() > this.tryMax)");
 					setState(State.CONNECTION);
 				} else {
 					this.output.add(
@@ -284,10 +286,10 @@ public class Network extends Node {
 		boolean flag = true;
 		if (this.tryMax > 0) {
 			if (this.tryMin < this.tryMax) {
-				logger.fine("getTry() ((tryMin = " + this.tryMin + ") < (tryMax = " + this.tryMax + "))");
+				logger.debug("getTry() ((tryMin = " + this.tryMin + ") < (tryMax = " + this.tryMax + "))");
 				this.tryMin += 1;
 			} else {
-				logger.warning("getTry(" + this.tryMin + ", " + this.tryMax + ") (tryMin>=tryMax)");
+				logger.warn("getTry(" + this.tryMin + ", " + this.tryMax + ") (tryMin>=tryMax)");
 				flag = false;
 			}
 		}
@@ -297,7 +299,7 @@ public class Network extends Node {
 	protected boolean io() {
 		boolean input = true;
 		if (this.moduleMap.size() < this.moduleMapSize) {
-			logger.warning("io() (this.moduleMap.size()<this.moduleMapSize)");
+			logger.warn("io() (this.moduleMap.size()<this.moduleMapSize)");
 			input = false;
 		}
 		return input;
@@ -317,15 +319,15 @@ public class Network extends Node {
 		int count = 0;
 		if (this.input != null) {
 			count++;
-			logger.fine("connectionStart() (this.input == " + this.input + ")");
+			logger.debug("connectionStart() (this.input == " + this.input + ")");
 		}
 		if (this.output != null) {
 			count++;
-			logger.fine("connectionStart() (this.output == " + this.output + ")");
+			logger.debug("connectionStart() (this.output == " + this.output + ")");
 		}
 		if (this.delay != null) {
 			count++;
-			logger.fine("connectionStart() (this.delay == " + this.delay + ")");
+			logger.debug("connectionStart() (this.delay == " + this.delay + ")");
 		}
 		CountDownLatch countDownLatch = new CountDownLatch(count);
 		if (this.input != null) {
@@ -340,11 +342,11 @@ public class Network extends Node {
 		this.moduleMapSize = this.moduleMap.size();
 		moduleMapStart(this.moduleMap);
 		try {
-			logger.fine("connectionStart() (countDownLatch.await())");
+			logger.debug("connectionStart() (countDownLatch.await())");
 			countDownLatch.await();
 			flag = true;
 		} catch (InterruptedException ie) {
-			logger.warning("connectionStart() InterruptedException");
+			logger.warn("connectionStart() InterruptedException");
 		}
 		return flag;
 	}

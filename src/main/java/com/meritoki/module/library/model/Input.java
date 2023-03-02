@@ -40,9 +40,9 @@ public class Input extends Node {
 		this.minInputDelay = Utility.stringToDouble(getProperty("@minInputDelay"));
 		this.maxInputDelay = Utility.stringToDouble(getProperty("@maxInputDelay"));
 		this.byteArrayLength = Utility.stringToInteger(getProperty("@byteArrayLength"));
-		logger.fine("initialize() this.minInputDelay="+this.minInputDelay);
-		logger.fine("initialize() this.maxInputDelay="+this.maxInputDelay);
-		logger.fine("initialize() this.byteArrayLength="+this.byteArrayLength);
+		logger.debug("initialize() this.minInputDelay="+this.minInputDelay);
+		logger.debug("initialize() this.maxInputDelay="+this.maxInputDelay);
+		logger.debug("initialize() this.byteArrayLength="+this.byteArrayLength);
 		this.setState(State.INPUT);
 	}
 
@@ -80,28 +80,28 @@ public class Input extends Node {
 				}
 			}
 		} catch (IOException e) {
-			logger.severe("input(object) IOException");
+			logger.error("input(object) IOException");
 			this.destroy();
 		}
 	}
 
 	protected void inputData(Object object) {
 		if (object != null) {
-			logger.finest("inputContainer(" + object + ")");
+			logger.trace("inputContainer(" + object + ")");
 			this.rootAdd(new Data(this.id.intValue(), this.id.intValue(), DataType.INPUT, 0.0D, object, null));
 		}
 	}
 	
 	protected void inputStreamClose(InputStream inputStream) {
-		logger.finest(this + ".inputStreamClose(" + inputStream + ")");
+		logger.trace(this + ".inputStreamClose(" + inputStream + ")");
 		if (inputStream != null) {
 			try {
 				inputStream.close();
 			} catch (IOException e) {
-				logger.warning(this + ".inputStreamClose(" + inputStream + ") IOException");
+				logger.warn(this + ".inputStreamClose(" + inputStream + ") IOException");
 			}
 		} else {
-			logger.warning(this + ".inputStreamClose(" + inputStream + ") (inputStream = " + inputStream + ")");
+			logger.warn(this + ".inputStreamClose(" + inputStream + ") (inputStream = " + inputStream + ")");
 		}
 	}
 }
@@ -113,10 +113,10 @@ public class Input extends Node {
 //		this.poll = false;
 //		inputData(Boolean.valueOf(this.poll));
 //		setDelay(newDelay(this.waitForInputMaxDelay));
-//		logger.warning("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
+//		logger.warn("input() (this.setDelayExpiration(this.newDelayExpiration(" + this.waitForInputMaxDelay
 //				+ ")))");
 //	} else {
-//		logger.warning("input() this.delayExpired()");
+//		logger.warn("input() this.delayExpired()");
 //		setState(0);
 //	}
 //	break;

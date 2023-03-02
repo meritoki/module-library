@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
@@ -30,12 +29,14 @@ import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.meritoki.module.library.model.protocol.Protocol;
 import com.meritoki.module.library.model.protocol.ProtocolType;
 
 public class Bluetooth extends Network {
-	protected Logger logger = Logger.getLogger(Bluetooth.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Bluetooth.class.getName());
 	private String deviceUUID;
 	private String serviceName;
 	protected StreamConnection streamConnection;
@@ -163,7 +164,7 @@ public class Bluetooth extends Network {
 					this.streamConnection.close();
 					this.streamConnectionNotifier.close();
 				} catch (IOException e) {
-					logger.warning("IOException "+e.getMessage());
+					logger.warn("IOException "+e.getMessage());
 				}
 				this.input.destroy();
 				this.output.destroy();

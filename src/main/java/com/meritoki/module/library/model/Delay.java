@@ -18,7 +18,6 @@ package com.meritoki.module.library.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import com.meritoki.module.library.model.data.Data;
 import com.meritoki.module.library.model.data.DataType;

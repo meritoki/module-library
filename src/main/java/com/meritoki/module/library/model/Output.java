@@ -54,7 +54,7 @@ public class Output extends Node {
 				break;
 			}
 			default: {
-				logger.warning("inputState("+object+") !DataType.OUTPUT");
+				logger.warn("inputState("+object+") !DataType.OUTPUT");
 			}
 			}
 		}
@@ -67,9 +67,9 @@ public class Output extends Node {
 			try {
 				this.outputStream.write(byteArray);
 				this.outputStream.flush();
-				logger.fine("output("+object+") written");
+				logger.trace("output("+object+") written");
 			} catch (IOException e) {
-				logger.severe("output(" + object + ") IOException");
+				logger.error("output(" + object + ") IOException");
 				this.destroy();
 			}
 		}
@@ -77,16 +77,16 @@ public class Output extends Node {
 
 	protected void outputStreamClose(OutputStream outputStream) {
 
-		logger.finest(this + ".outputStreamClose(" + outputStream + ")");
+		logger.trace(this + ".outputStreamClose(" + outputStream + ")");
 		
 		if (outputStream != null) {
 			try {
 				outputStream.close();
 			} catch (IOException e) {
-				logger.warning(this + ".outputStreamClose(" + outputStream + ") IOException");
+				logger.warn(this + ".outputStreamClose(" + outputStream + ") IOException");
 			}
 		} else {
-			logger.warning(this + ".outputStreamClose(" + outputStream + ") (outputStream = null)");
+			logger.warn(this + ".outputStreamClose(" + outputStream + ") (outputStream = null)");
 		}
 	}
 }
