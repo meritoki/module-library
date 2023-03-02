@@ -17,7 +17,9 @@ package com.meritoki.module.library.model.protocol;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.meritoki.module.library.model.Utility;
 
 public class Protocol {
-	protected Logger logger = Logger.getLogger(Protocol.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Protocol.class.getName());
 	@JsonProperty
 	protected ProtocolType type;
 	@JsonProperty
@@ -286,7 +288,7 @@ public class Protocol {
 	@JsonIgnore
 	public int getIndex() {
 
-		logger.finest("getIndex() (this.index = " + this.index + ")");
+		logger.trace("getIndex() (this.index = " + this.index + ")");
 
 		return this.index;
 	}
@@ -311,7 +313,7 @@ public class Protocol {
 	public void setByteArray(byte[] byteArray) {
 		this.byteArray = byteArray;
 
-		logger.finest(this + ".setByteArray(" + byteArray + ") (byteArray = "
+		logger.trace(this + ".setByteArray(" + byteArray + ") (byteArray = "
 				+ Utility.byteArrayToByteArrayString(this.byteArray) + ")");
 
 	}
@@ -360,7 +362,7 @@ public class Protocol {
 					+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(i & 0xFF), 2) + ",";
 		}
 
-		logger.fine("computeCRC8Two(" + intArray + ") (intArray = " + intArrayString + ") (crc = " + "0x"
+		logger.debug("computeCRC8Two(" + intArray + ") (intArray = " + intArrayString + ") (crc = " + "0x"
 				+ Utility.getZeroFilledRightJustifiedString(Integer.toHexString(crc), 2) + " = "
 				+ Utility.getZeroFilledRightJustifiedString(Integer.toBinaryString(crc), 8) + "))");
 
@@ -454,7 +456,7 @@ public class Protocol {
 		try {
 			string = ow.writeValueAsString(this);
 		} catch (IOException ex) {
-			logger.severe("IOException " + ex.getMessage());
+			logger.error("IOException " + ex.getMessage());
 		}
 		return string;
 	}
@@ -556,14 +558,14 @@ public class Protocol {
 //public void setDataByteArray(byte[] dataByteArray) {
 //this.dataByteArray = dataByteArray;
 //
-//logger.finest(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
+//logger.trace(this + ".setDataByteArray(" + dataByteArray + ") (dataByteArray = "
 //		+ Utility.byteArrayToByteArrayString(this.dataByteArray) + ")");
 //
 //}
 
 //public int setByteCount(int byteCount) {
 //
-//logger.finest("setByteCount(" + byteCount + ")");
+//logger.trace("setByteCount(" + byteCount + ")");
 //
 //return this.byteCount = byteCount;
 //}

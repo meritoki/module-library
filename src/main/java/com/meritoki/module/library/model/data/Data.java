@@ -32,7 +32,9 @@ limitations under the License.
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class Data {
-	protected Logger logger = Logger.getLogger(Data.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(Data.class.getName());
 	@JsonProperty
 	protected int destinationID;
 	@JsonProperty
@@ -129,7 +131,7 @@ public class Data {
 		try {
 			string = ow.writeValueAsString(this);
 		} catch (IOException ex) {
-			logger.warning("IOException " + ex.getMessage());
+			logger.warn("IOException " + ex.getMessage());
 		}
 		return string;
 	}
