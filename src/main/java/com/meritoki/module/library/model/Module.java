@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Module extends URLClassLoader implements ModuleInterface {
-	protected Logger logger = LoggerFactory.getLogger(Module.class.getName());
+	protected static Logger logger = LoggerFactory.getLogger(Module.class.getName());
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new LinkedHashMap<>());
@@ -52,6 +52,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected CountDownLatch countDownLatch = null;
 
 	public static void main(String[] args) {
+		logger.info("Hello World");
 		Module module = new Module(0);
 		CountDownLatch countDownLatch;
 		module.setCountDownLatch(countDownLatch = new CountDownLatch(1));
