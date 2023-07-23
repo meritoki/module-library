@@ -139,12 +139,31 @@ public class Node extends Machine {
 			inputState(object);
 			break;
 		}
+		case OUTPUT: {
+			outputState(object);
+			break;
+		}
 		default:
 			super.machine(state, object);
 		}
 	}
 
 	protected void inputState(Object object) {
+		if ((object instanceof Data)) {
+			Data data = (Data) object;
+			object = data.getObject();
+			switch (data.getType()) {
+			case POLL: {
+				poll(data, true);
+			}
+			default: {
+				logger.warn("inputState("+object+") "+data.getType()+" Unsupported");
+			}
+			}
+		}
+	}
+	
+	protected void outputState(Object object) {
 		if ((object instanceof Data)) {
 			Data data = (Data) object;
 			object = data.getObject();

@@ -18,6 +18,7 @@ package com.meritoki.module.library.model;
 public enum State {
 	DEFAULT,
 	INPUT,
+	OUTPUT,
 	CONNECTION,
 	WAIT,
 	SEARCH,

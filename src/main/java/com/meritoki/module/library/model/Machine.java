@@ -24,7 +24,7 @@ public class Machine extends Module {
 	protected State state = State.DEFAULT;
 	protected State previousState = null;
 	protected double defaultDelay = 1.0;
-	protected long sleepDelay = 100;
+	protected long sleepDelay = 500;
 
 	public static void main(String[] args) {
 		Machine stateMachine = new Machine(0);
@@ -74,9 +74,10 @@ public class Machine extends Module {
 
 	protected void machine(State state, Object object) {
 		switch (state) {
-		case DEFAULT:
+		case DEFAULT: {
 			defaultState(object);
 			break;
+		}
 		default:
 			logger.warning("machine(...) NO STATE");
 		}
