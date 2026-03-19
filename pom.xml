@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>com.meritoki.library</groupId>
 			<artifactId>controller</artifactId>
-			<version>0.5.202303</version>
+			<version>0.6.202603</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
