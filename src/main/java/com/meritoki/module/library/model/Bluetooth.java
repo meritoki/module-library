@@ -88,10 +88,8 @@ public class Bluetooth extends Network {
 																									// connects
 					flag = connection(this.streamConnection);
 				} catch (BluetoothStateException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -115,7 +113,6 @@ public class Bluetooth extends Network {
 		try {
 			inputStream = streamConnection.openInputStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return inputStream;
@@ -126,7 +123,6 @@ public class Bluetooth extends Network {
 		try {
 			outputStream = streamConnection.openOutputStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return outputStream;

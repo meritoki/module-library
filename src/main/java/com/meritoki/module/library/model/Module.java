@@ -184,10 +184,10 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	}
 
 	public void add(Object object) {
-//		logger.info("add(" + object + ")");
+		logger.info("add(" + object + ")");
 		synchronized (this.objectList) {
-			if ((object instanceof List)) {
-				this.objectList.addAll((List) object);
+			if ((object instanceof List<?>)) {
+				this.objectList.addAll((List<?>) object);
 			} else {
 				this.objectList.add(object);
 			}

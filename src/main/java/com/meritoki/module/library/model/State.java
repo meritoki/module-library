@@ -16,6 +16,7 @@
 package com.meritoki.module.library.model;
 
 public enum State {
+	NULL,
 	DEFAULT,
 	INPUT,
 	OUTPUT,
@@ -24,5 +25,10 @@ public enum State {
 	SEARCH,
 	SCAN,
 	BLOCK,
-	UNBLOCK
+	UNBLOCK,
+	LOAD,
+	COMPLETE,
+	EXCEPTION,
+	PAINT,
+	SYNC
 }

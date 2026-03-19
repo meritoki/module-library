@@ -31,9 +31,7 @@ public class Client extends Web {
 			System.out.println("Waiting...");
 			try {
 				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (InterruptedException e) {				e.printStackTrace();
 			}
 		}
 		client.add(new Data(0,0,DataType.OUTPUT,0,"{Hello World}",null));

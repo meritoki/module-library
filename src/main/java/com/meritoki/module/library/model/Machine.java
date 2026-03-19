@@ -23,7 +23,7 @@ public class Machine extends Module {
 	protected Logger logger = Logger.getLogger(Machine.class.getName());
 	protected State state = State.DEFAULT;
 	protected State previousState = null;
-	protected double defaultDelay = 1.0;
+	protected double defaultDelay = 0.2;
 	protected long sleepDelay = 500;
 
 	public static void main(String[] args) {

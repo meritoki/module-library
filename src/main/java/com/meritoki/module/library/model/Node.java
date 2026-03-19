@@ -41,7 +41,7 @@ public class Node extends Machine {
 	protected String configurationPropertiesPath = null;
 	protected Properties configurationProperties = null;
 	protected Set<Object> configurationPropertiesKeySet = new HashSet<>();
-	protected boolean filter = true;
+	protected boolean filter = false;
 	
 	public static void main(String[] args) {
 		Node node = new Node(0);
