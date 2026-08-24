@@ -28,12 +28,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Module extends URLClassLoader implements ModuleInterface {
 	protected static Logger logger = LoggerFactory.getLogger(Module.class.getName());
+	public String name;
 	protected List<Object> objectList = Collections.synchronizedList(new ArrayList<>());
 	protected Set<Integer> idSet = Collections.synchronizedSet(new HashSet<>());
 	protected Map<String, Module> moduleMap = Collections.synchronizedMap(new LinkedHashMap<>());
@@ -41,7 +45,6 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public Thread thread = null;
 	public Module root = null;
 	protected Integer id = Integer.valueOf(0);
-	protected volatile boolean start = true;
 	protected volatile boolean run = true;
 	protected volatile boolean destroy = false;
 	protected volatile boolean protect = false;
@@ -50,6 +53,11 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected double alive = 0.0D;
 	public boolean interrupt = true;
 	protected CountDownLatch countDownLatch = null;
+	private final Lock lock = new ReentrantLock();
+	private final Condition condition = lock.newCondition();
+	public boolean pause = false;
+	protected double defaultDelay = 5;
+	protected long sleepDelay = 100;
 
 	public static void main(String[] args) {
 		logger.info("Hello World");
@@ -83,6 +91,16 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		}
 	}
 
+	public Module(String name) {
+		this(name.hashCode());
+		this.name = name;
+	}
+
+	public Module(String name, Module module) {
+		this(name.hashCode(), module);
+		this.name = name;
+	}
+
 	public Module(Module module) {
 		super(module.getURLs(), Module.class.getClassLoader());
 		setID(0);
@@ -97,16 +115,15 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		this.idSet.add(this.id);
 	}
 
-
 	public void start() {
-		if (this.start) {
-			this.start = false;
+		logger.trace("start() this.thread=" + this.thread);
+		if (this.thread == null) {
 			this.run = true;
-			logger.debug("start()");
 			this.thread = new Thread(this);
 			this.thread.setName(toString());
 			this.thread.start();
 		}
+//		this.resume();
 	}
 
 	public void initialize() {
@@ -117,17 +134,69 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		this.initialize();
 		logger.trace(this + ".run()");
 		this.countDownLatchCountDown();
+		while (this.run) {
+			function();
+		}
+	}
+
+	public void function() {
+		logger.info("function() pause="+this.pause);
+		if (!this.pause) {
+			this.sleep(this.sleepDelay);
+		} else {
+			this.await();
+		}
+	}
+
+	/**
+	 * Must not do reset or init
+	 */
+	public void pause() {
+		logger.info(this+".pause()");
+		this.pause = true;
+	}
+
+	public void await() {
+		try {
+			lock.lock();
+			try {
+				// Always check conditions in a loop to protect against spurious wakeups
+				while (pause) {
+					logger.info(this + ".await()");
+					condition.await(); // Releases lock and suspends thread
+				}
+				logger.info(Thread.currentThread().getName() + ".awaitLoop() resume");
+			} finally {
+				lock.unlock();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// Thread B executes this to update state and wake Thread A
+	/**
+	 * Must not do reset or init
+	 */
+	public void resume() {
+		lock.lock();
+		try {
+			pause = false;
+			logger.info(this + ".resume()");
+			condition.signalAll(); // Wakes up suspended threads
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	public void stop() {
-		logger.info(this + ".stop()");
+		logger.trace(this + ".stop()");
+		this.pause = false;
 		this.run = false;
-		if ((this.thread != null)) {// && (this.interrupt)) {
+		if ((this.thread != null)) {
 			this.thread.interrupt();
-			logger.info(this + ".stop() this.thread.isInterrupted()="+this.thread.isInterrupted());
-			logger.info(this + ".stop() this.thread.isInterrupted()="+this.thread.isInterrupted());
+			this.thread = null;
 		}
-		this.start = true;
 	}
 
 	public void destroy() {
@@ -157,14 +226,14 @@ public class Module extends URLClassLoader implements ModuleInterface {
 			logger.debug("countDownLatchCountDown() (this.countDownLatch.getCount() = " + this.countDownLatch.getCount()
 					+ ")");
 
-		} 
+		}
 //		else {
 //			logger.warn("countDownLatchCountDown() (this.countDownLatch == null)");
 //		}
 	}
 
 	public boolean getStart() {
-		return this.start;
+		return this.run;
 	}
 
 	public boolean getRun() {
@@ -230,7 +299,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public void moduleMapPut(Object object) {
 		if ((object instanceof Module)) {
-			Module module = (Module)object;
+			Module module = (Module) object;
 			module.setRoot(this);
 			this.moduleMap.put(module.toString(), module);
 		}
@@ -275,9 +344,9 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	public Module getRoot() {
 		return this.root;
 	}
-	
+
 	public Module getAbsoluteRoot() {
-		if(this.root == null) {
+		if (this.root == null) {
 			return this;
 		}
 		return this.root.getAbsoluteRoot();
@@ -291,15 +360,15 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		return this.idSet;
 	}
 
-	public String toString() {
-		String string = super.toString();
-		String stringPackage = getClass().getPackage().getName();
-		if (stringPackage != null) {
-			string = string.replaceFirst("^" + stringPackage + ".", "");
-			string = string.substring(0, string.indexOf('@'));
-		}
-		return string;
-	}
+//	public String toString() {
+//		String string = super.toString();
+//		String stringPackage = getClass().getPackage().getName();
+//		if (stringPackage != null) {
+//			string = string.replaceFirst("^" + stringPackage + ".", "");
+//			string = string.substring(0, string.indexOf('@'));
+//		}
+//		return string;
+//	}
 
 	protected boolean delayExpired() {
 		boolean flag = now() > this.delay;
@@ -314,7 +383,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 	protected void setDelay(double delay) {
 		this.delay = delay;
 	}
-	
+
 	protected boolean aliveExpired() {
 		boolean flag = now() > this.alive;
 		return flag;
@@ -352,7 +421,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 			String string;
 			if ((string = (String) moduleHashMapIterator.next()) != null) {
 				Module module;
-				if (((module = (Module) moduleMap.get(string)) != null) && (module.getStart())) {
+				if (((module = (Module) moduleMap.get(string)) != null) && (module.thread == null)) {
 					module.start();
 				}
 			}
@@ -439,7 +508,7 @@ public class Module extends URLClassLoader implements ModuleInterface {
 		double now = time / 1000.0D;
 		return now + delay;
 	}
-	
+
 	protected double newAlive(double delay) {
 		logger.trace("newAlive(" + delay + ")");
 		Date date = new Date();
@@ -473,5 +542,14 @@ public class Module extends URLClassLoader implements ModuleInterface {
 
 	public int getModuleMapSize() {
 		return this.moduleMap.size();
+	}
+	
+	@Override
+	public String toString() {
+		String string = super.toString();
+		if(this.name != null) {
+			string = this.name;
+		}
+		return string;
 	}
 }

@@ -33,7 +33,7 @@ import com.meritoki.module.library.model.data.DataType;
 
 public class Node extends Machine {
 	
-	public String name;
+	
 	protected Logger logger = LoggerFactory.getLogger(Node.class.getName());
 	protected double inputDelay = 1.0;
 	protected Properties idProperties = null;
@@ -123,14 +123,7 @@ public class Node extends Machine {
 		return this.idProperties;
 	}
 	
-	@Override
-	public String toString() {
-		String string = super.toString();
-		if(this.name != null) {
-			string = this.name;
-		}
-		return string;
-	}
+
 
 	@Override
 	protected void machine(State state, Object object) {

@@ -19,21 +19,30 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 public class Machine extends Module {
-	
+
+
 	protected Logger logger = Logger.getLogger(Machine.class.getName());
 	protected State state = State.DEFAULT;
 	protected State previousState = null;
-	protected double defaultDelay = 0.2;
-	protected long sleepDelay = 500;
 
 	public static void main(String[] args) {
 		Machine stateMachine = new Machine(0);
 		CountDownLatch countDownLatch;
-	    stateMachine.setCountDownLatch(countDownLatch = new CountDownLatch(1));
+		stateMachine.setCountDownLatch(countDownLatch = new CountDownLatch(1));
 		stateMachine.start();
 	}
 
 	public Machine() {
+	}
+	
+	public Machine(String name) {
+		super(name.hashCode());
+		this.name = name;
+	}
+	
+	public Machine(String name, Module module) {
+		super(name.hashCode(),module);
+		this.name = name;
 	}
 
 	public Machine(int id) {
@@ -47,29 +56,26 @@ public class Machine extends Module {
 	@Override
 	public void initialize() {
 		super.initialize();
-		logger.fine("initialize() this.defaultDelay="+this.defaultDelay);
-	}
-
-	public void run() {
-		super.run();
-		while (this.run) {
-			machine();
-			this.sleep(this.sleepDelay);
-		}
+		logger.fine("initialize() this.defaultDelay=" + this.defaultDelay);
 	}
 
 	public State getState() {
 		return this.state;
 	}
-	
+
+	@Override
 	public void function() {
-		
+		if (!this.pause) {
+			machine();
+			this.sleep(this.sleepDelay);
+		} else {
+			this.await();
+		}
 	}
 
 	protected void machine() {
 		Object object = remove(0);
 		machine(this.state, object);
-		function();
 	}
 
 	protected void machine(State state, Object object) {
@@ -82,7 +88,7 @@ public class Machine extends Module {
 			logger.warning("machine(...) NO STATE");
 		}
 	}
-	
+
 	protected void defaultState(Object object) {
 		if (delayExpired()) {
 			setDelay(newDelay(this.defaultDelay));
