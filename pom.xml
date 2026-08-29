@@ -24,31 +24,41 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>com.meritoki.module.library.model.Module</mainClass>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-						</manifest>
-						<manifestEntries>
-							<Specification-Vendor>Meritoki</Specification-Vendor>
-							<Implementation-Vendor>Meritoki</Implementation-Vendor>
-						</manifestEntries>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.0</version> <!-- Use the latest version -->
 				<executions>
 					<execution>
-						<id>make-assembly</id>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.meritoki.module.library.model.Module</mainClass>
+									<manifestEntries>
+										<Specification-Vendor>Meritoki</Specification-Vendor>
+										<Implementation-Vendor>Meritoki</Implementation-Vendor>
+									</manifestEntries>
+								</transformer>
+							</transformers>
+							<filters>
+								<filter>
+									<!-- Matches all dependencies -->
+									<artifact>*:*</artifact>
+									<excludes>
+										<!-- Strip out foreign Maven plugin
+										metadata -->
+										<exclude>META-INF/maven/**/plugin.xml</exclude>
+										<exclude>
+											META-INF/maven/**/pom.properties</exclude>
+										<exclude>META-INF/maven/**/pom.xml</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -81,17 +91,6 @@
 			<groupId>net.sf.bluecove</groupId>
 			<artifactId>bluecove-gpl</artifactId>
 			<version>2.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.11.0</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
