@@ -65,12 +65,12 @@ public class Machine extends Module {
 
 	@Override
 	public void function() {
-		if (!this.pause) {
+//		if (!this.pause) {
 			machine();
 			this.sleep(this.sleepDelay);
-		} else {
-			this.await();
-		}
+//		} else {
+//			this.await();
+//		}
 	}
 
 	protected void machine() {
