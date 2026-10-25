@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+		</Console>
+		<RollingFile name="rollingFile"
+			fileName="logs/module.log"
+			filePattern="logs/module.%d{dd-MMM}.log.gz"
+			ignoreExceptions="false">
+			<PatternLayout
+				pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+			<Policies>
+				<OnStartupTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="10 MB" />
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+			<DefaultRolloverStrategy max="5" />
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="INFO" additivity="false">
+			<AppenderRef ref="rollingFile" />
+			<AppenderRef ref="console" />
+		</Root>
+	</Loggers>
+</Configuration>
